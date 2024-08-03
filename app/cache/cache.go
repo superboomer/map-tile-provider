@@ -11,6 +11,7 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
+// Cache contains all necessary stuff for cache
 type Cache struct {
 	db    *bolt.DB
 	path  string
@@ -29,13 +30,14 @@ func unixTimeDecode(b []byte) time.Time {
 	return time.Unix(i, 0)
 }
 
+// LoadCache create Cache struct
 func LoadCache(path string, alive time.Duration) (*Cache, error) {
-	err := os.MkdirAll(path, 0600)
+	err := os.MkdirAll(path, 0o600)
 	if err != nil {
 		return nil, err
 	}
 
-	db, err := bolt.Open(filepath.Join(path, "index.db"), 0600, nil)
+	db, err := bolt.Open(filepath.Join(path, "index.db"), 0o600, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +45,8 @@ func LoadCache(path string, alive time.Duration) (*Cache, error) {
 	return &Cache{db: db, path: path, alive: alive}, nil
 }
 
-func (c *Cache) LoadFile(vendor string, tile *tile.Tile) ([]byte, error) {
+// LoadFile load tile image from cache
+func (c *Cache) LoadFile(vendor string, t *tile.Tile) ([]byte, error) {
 	err := c.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(vendor))
 
@@ -51,7 +54,7 @@ func (c *Cache) LoadFile(vendor string, tile *tile.Tile) ([]byte, error) {
 			return fmt.Errorf("cache is invalid")
 		}
 
-		v := b.Get([]byte(fmt.Sprintf("%d_%d_%d", tile.X, tile.Y, tile.Z)))
+		v := b.Get([]byte(fmt.Sprintf("%d_%d_%d", t.X, t.Y, t.Z)))
 		if v == nil {
 			return fmt.Errorf("cache is invalid")
 		}
@@ -67,7 +70,7 @@ func (c *Cache) LoadFile(vendor string, tile *tile.Tile) ([]byte, error) {
 		return nil, err
 	}
 
-	img, err := os.ReadFile(filepath.Join(c.path, vendor, fmt.Sprintf("%d", tile.Z), fmt.Sprintf("%d_%d.jpeg", tile.X, tile.Y)))
+	img, err := os.ReadFile(filepath.Clean(filepath.Join(c.path, vendor, fmt.Sprintf("%d", t.Z), fmt.Sprintf("%d_%d.jpeg", t.X, t.Y))))
 	if err != nil {
 		return nil, fmt.Errorf("can't read image from cache: %w", err)
 	}
@@ -75,13 +78,14 @@ func (c *Cache) LoadFile(vendor string, tile *tile.Tile) ([]byte, error) {
 	return img, nil
 }
 
-func (c *Cache) SaveTile(vendor string, tile *tile.Tile) error {
-	if tile.Image == nil {
+// SaveTile save tile to boldDB and write image on disk
+func (c *Cache) SaveTile(vendor string, t *tile.Tile) error {
+	if t.Image == nil {
 		return fmt.Errorf("image not provided")
 	}
 
 	return c.db.Update(func(tx *bolt.Tx) error {
-		err := c.saveImage(vendor, tile)
+		err := c.saveImage(vendor, t)
 		if err != nil {
 			return err
 		}
@@ -90,22 +94,23 @@ func (c *Cache) SaveTile(vendor string, tile *tile.Tile) error {
 		if err != nil {
 			return err
 		}
-		return b.Put([]byte(fmt.Sprintf("%d_%d_%d", tile.X, tile.Y, tile.Z)), unixTimeEncode(time.Now()))
+		return b.Put([]byte(fmt.Sprintf("%d_%d_%d", t.X, t.Y, t.Z)), unixTimeEncode(time.Now()))
 	})
 }
 
-func (c *Cache) saveImage(vendor string, tile *tile.Tile) error {
-	err := os.MkdirAll(filepath.Join(c.path, vendor, fmt.Sprintf("%d", tile.Z)), 0600)
+// saveImage create cache folder if need and save image on disk
+func (c *Cache) saveImage(vendor string, t *tile.Tile) error {
+	err := os.MkdirAll(filepath.Join(c.path, vendor, fmt.Sprintf("%d", t.Z)), 0o600)
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(filepath.Join(c.path, vendor, fmt.Sprintf("%d", tile.Z), fmt.Sprintf("%d_%d.jpeg", tile.X, tile.Y)))
+	file, err := os.Create(filepath.Clean(filepath.Join(c.path, vendor, fmt.Sprintf("%d", t.Z), fmt.Sprintf("%d_%d.jpeg", t.X, t.Y))))
 	if err != nil {
 		return fmt.Errorf("unable to create file: %w", err)
 	}
 	defer file.Close()
 
-	_, err = file.Write(tile.Image)
+	_, err = file.Write(t.Image)
 	return err
 }

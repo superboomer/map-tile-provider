@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "image/png"
 	"log"
 	"os"
 	"os/signal"

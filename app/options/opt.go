@@ -8,12 +8,14 @@ type Opts struct {
 	Swagger bool   `long:"swagger" env:"SWAGGER" description:"host swagger docs"`
 }
 
+// Cache represent struct for Cache options
 type Cache struct {
 	Enable bool   `long:"enable" env:"ENABLE" description:"enable cache"`
 	Path   string `long:"path" env:"PATH" default:"./data/cache" description:"a path for cache dir"`
 	Alive  int    `long:"alive" env:"ALIVE" default:"14400" description:"cache alive in minutes"`
 }
 
+// Log represent struct for Log options
 type Log struct {
 	Save       bool   `long:"save" env:"SAVE" description:"enable logs save"`
 	Path       string `long:"path" env:"PATH" default:"./data/logs/log.jsonl" description:"a path for logs dir"`

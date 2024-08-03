@@ -7,6 +7,7 @@ import (
 	"github.com/superboomer/map-tile-provider/app/tile"
 )
 
+// ArcGISLoader implement Provider interface for ArcGIS provider
 type ArcGISLoader struct {
 	maxJobs int
 	maxZoom int
@@ -14,6 +15,7 @@ type ArcGISLoader struct {
 	name    string
 }
 
+// ArcGIS return ArcGIS provider
 func ArcGIS() Provider {
 	return ArcGISLoader{
 		name:    "arcgis",
@@ -23,6 +25,7 @@ func ArcGIS() Provider {
 	}
 }
 
+// GetTile calculate tile XYZ
 func (l ArcGISLoader) GetTile(lat, long, scale float64) tile.Tile {
 
 	tileX, tileY := tile.ConvertToTile(lat, long, scale, &tile.ElipsSpherical)
@@ -34,22 +37,26 @@ func (l ArcGISLoader) GetTile(lat, long, scale float64) tile.Tile {
 	}
 }
 
+// MaxJobs return count of max tile downloading per request
 func (l ArcGISLoader) MaxJobs() int {
 	return l.maxJobs
 }
 
+// MaxZoom return max zoom for specified provider
 func (l ArcGISLoader) MaxZoom() int {
 	return l.maxZoom
 }
 
+// Name return provider name
 func (l ArcGISLoader) Name() string {
 	return l.name
 }
 
+// GetRequest build http request for specified Tile
 func (l ArcGISLoader) GetRequest(t *tile.Tile) *http.Request {
 
 	buildRequest := fmt.Sprintf("%s/%d/%d/%d", l.url, t.Z, t.Y, t.X)
-	req, _ := http.NewRequest(http.MethodGet, buildRequest, nil)
+	req, _ := http.NewRequest(http.MethodGet, buildRequest, http.NoBody)
 
 	return req
 }

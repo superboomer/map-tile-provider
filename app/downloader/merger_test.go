@@ -10,7 +10,8 @@ import (
 	"github.com/superboomer/map-tile-provider/app/tile"
 )
 
-func createTestImage(width, height int, c color.Color) []byte {
+func createTestImage(c color.Color) []byte {
+	width, height := 100, 100
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
@@ -29,13 +30,13 @@ func TestMerge(t *testing.T) {
 	centerTile := tile.Tile{X: 1, Y: 1}
 
 	tiles := []tile.Tile{
-		{X: 0, Y: 0, Image: createTestImage(100, 100, color.RGBA{255, 0, 0, 255})},     // Red
-		{X: 1, Y: 0, Image: createTestImage(100, 100, color.RGBA{0, 255, 0, 255})},     // Green
-		{X: 2, Y: 0, Image: createTestImage(100, 100, color.RGBA{0, 0, 255, 255})},     // Blue
-		{X: 0, Y: 1, Image: createTestImage(100, 100, color.RGBA{255, 255, 0, 255})},   // Yellow
-		{X: 1, Y: 1, Image: createTestImage(100, 100, color.RGBA{255, 0, 255, 255})},   // Magenta (center)
-		{X: 2, Y: 1, Image: createTestImage(100, 100, color.RGBA{0, 255, 255, 255})},   // Cyan
-		{X: 1, Y: 2, Image: createTestImage(100, 100, color.RGBA{128, 128, 128, 255})}, // Gray
+		{X: 0, Y: 0, Image: createTestImage(color.RGBA{255, 0, 0, 255})},     // Red
+		{X: 1, Y: 0, Image: createTestImage(color.RGBA{0, 255, 0, 255})},     // Green
+		{X: 2, Y: 0, Image: createTestImage(color.RGBA{0, 0, 255, 255})},     // Blue
+		{X: 0, Y: 1, Image: createTestImage(color.RGBA{255, 255, 0, 255})},   // Yellow
+		{X: 1, Y: 1, Image: createTestImage(color.RGBA{255, 0, 255, 255})},   // Magenta (center)
+		{X: 2, Y: 1, Image: createTestImage(color.RGBA{0, 255, 255, 255})},   // Cyan
+		{X: 1, Y: 2, Image: createTestImage(color.RGBA{128, 128, 128, 255})}, // Gray
 	}
 
 	resultBytes, err := Merge(side, centerTile, tiles...)
@@ -78,7 +79,7 @@ func TestMerge_ErrorEncoding(t *testing.T) {
 	centerTile := tile.Tile{X: 1, Y: 1}
 
 	tiles := []tile.Tile{
-		{X: 0, Y: 0, Image: createTestImage(100, 100, color.RGBA{255, 0, 0, 255})},
+		{X: 0, Y: 0, Image: createTestImage(color.RGBA{255, 0, 0, 255})},
 	}
 
 	resultBytes, err := Merge(side, centerTile, tiles...)

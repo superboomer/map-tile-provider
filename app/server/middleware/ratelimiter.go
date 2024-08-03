@@ -7,6 +7,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
+// GlobalRateLimiter is a rate limiter for /map query/ its affect all requests
 func (m *MD) GlobalRateLimiter(next func(w http.ResponseWriter, r *http.Request)) http.Handler {
 	limiter := rate.NewLimiter(2, 3) // 2 per second with batch 3 events
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -19,8 +20,8 @@ func (m *MD) GlobalRateLimiter(next func(w http.ResponseWriter, r *http.Request)
 				m.Logger.Info("request was limited by GlobalRateLimiter", zap.Error(err), zap.String("req_id", r.Header.Get("X-Request-ID")))
 			}
 			return
-		} else {
-			next(w, r)
 		}
+
+		next(w, r)
 	})
 }
