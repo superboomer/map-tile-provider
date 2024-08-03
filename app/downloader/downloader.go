@@ -16,12 +16,13 @@ type downloadQuery struct {
 	Error   error
 }
 
-func StartMultiDownload(cache *cache.Cache, l provider.Provider, tiles ...tile.Tile) ([]tile.Tile, error) {
+// StartMultiDownload orchestrates the concurrent downloading of multiple tiles using a specified provider
+func StartMultiDownload(c *cache.Cache, l provider.Provider, tiles ...tile.Tile) ([]tile.Tile, error) {
 	jobs := make(chan downloadQuery, l.MaxJobs())
 	results := make(chan downloadQuery, len(tiles))
 
 	for w := 1; w <= l.MaxJobs(); w++ {
-		go worker(cache, l.Name(), jobs, results)
+		go worker(c, l.Name(), jobs, results)
 	}
 
 	for _, p := range tiles {
@@ -45,10 +46,11 @@ func StartMultiDownload(cache *cache.Cache, l provider.Provider, tiles ...tile.T
 	return result, nil
 }
 
-func worker(cache *cache.Cache, vendor string, jobs <-chan downloadQuery, results chan<- downloadQuery) {
+// worker download image
+func worker(c *cache.Cache, vendor string, jobs <-chan downloadQuery, results chan<- downloadQuery) {
 	for j := range jobs {
-		if cache != nil {
-			cacheImg, err := cache.LoadFile(vendor, &j.Tile)
+		if c != nil {
+			cacheImg, err := c.LoadFile(vendor, &j.Tile)
 			if err == nil {
 				j.Tile.Image = cacheImg
 				results <- j
@@ -58,7 +60,7 @@ func worker(cache *cache.Cache, vendor string, jobs <-chan downloadQuery, result
 
 		resp, err := http.DefaultClient.Do(j.Request)
 		if err != nil {
-			j.Error = fmt.Errorf("error occured when sending request to the server: err=%w", err)
+			j.Error = fmt.Errorf("error occurred when sending request to the server: err=%w", err)
 			results <- j
 			continue
 		}
@@ -82,8 +84,8 @@ func worker(cache *cache.Cache, vendor string, jobs <-chan downloadQuery, result
 		_ = resp.Body.Close()
 		results <- j
 
-		if cache != nil {
-			go cache.SaveTile(vendor, &j.Tile)
+		if c != nil {
+			go c.SaveTile(vendor, &j.Tile)
 		}
 	}
 }

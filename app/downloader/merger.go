@@ -6,29 +6,29 @@ import (
 	"image"
 	"image/draw"
 	"image/jpeg"
-	_ "image/png"
 	"sort"
 
 	"github.com/superboomer/map-tile-provider/app/tile"
 )
 
-type imageTileSlice []*tile.Tile
+type imageTileSlice []tile.Tile
 
 // Len is part of sort.Interface.
 func (d imageTileSlice) Len() int {
 	return len(d)
 }
 
-// Swap is part of sort.Interface.
+// Swap is part of sort.Interface
 func (d imageTileSlice) Swap(i, j int) {
 	d[i], d[j] = d[j], d[i]
 }
 
-func (s imageTileSlice) Less(i, j int) bool {
-	if s[i].Y == s[j].Y {
-		return s[i].X < s[j].X
+// Less compare two value and return less
+func (d imageTileSlice) Less(i, j int) bool {
+	if d[i].Y == d[j].Y {
+		return d[i].X < d[j].X
 	}
-	return s[i].Y < s[j].Y
+	return d[i].Y < d[j].Y
 }
 
 // Merge combines multiple tiles into a single image
@@ -45,7 +45,7 @@ func Merge(side int, centerTile tile.Tile, tiles ...tile.Tile) ([]byte, error) {
 			centerTileOK = true
 		}
 
-		coordsData = append(coordsData, &t)
+		coordsData = append(coordsData, t)
 	}
 
 	if !centerTileOK {
@@ -54,7 +54,6 @@ func Merge(side int, centerTile tile.Tile, tiles ...tile.Tile) ([]byte, error) {
 
 	sort.Sort(coordsData)
 
-	// Create a 2D slice to hold images
 	images := make([][]image.Image, side)
 	for i := range images {
 		images[i] = make([]image.Image, side)
