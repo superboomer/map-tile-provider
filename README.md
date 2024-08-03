@@ -12,18 +12,18 @@ of OpenStreetMap if you use OSP tiles!
 ---
 #### Environment variables
 
-| Name          | Description   |  Optional | Defdault | 
+| Name          | Description   |  Optional | Default | 
 | ------------- |:-------------:|:--------:| ------ |
 |  ***LOG*** |
 | LOG_SAVE  | enable logs save | ***Optional***  | false
 | LOG_PATH     | logs path      | ***Optional***  | ./data/logs/log.jsonl
 | LOG_MAX_BACKUPS | max backups count      |  ***Optional***  | 3
-| LOG_MAX_SIZE | max logs size in megabytes      |  ***Optional***  | 1 mb
+| LOG_MAX_SIZE | max logs size in megabytes      |  ***Optional***  | 1
 | LOG_MAX_AGE | max logs age      |  ***Optional***  | 7
 |  ***CACHE*** |
 | CACHE_ENABLE | enable tile cache     | ***Optional***  | false
 | CACHE_PATH | a path for cache directory     | ***Optional***  | ./data/cache
-| CACHE_ALIVE | cache alive in minutes     | ***Optional***  | 14400 minutes
+| CACHE_ALIVE | cache alive in minutes     | ***Optional***  | 14400
 |  ***OTHERS*** |
 | API_PORT | api port    |  ***Optional***  | 8080
 | SWAGGER | swagger docs    |  ***Optional***  | false
