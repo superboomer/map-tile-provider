@@ -44,11 +44,11 @@ func Init(logger *zap.Logger, cacheOpts *options.Cache) (*API, error) {
 
 	if cacheOpts.Enable {
 		logger.Info("cache enabled", zap.String("path", cacheOpts.Path), zap.Duration("alive", time.Minute*time.Duration(cacheOpts.Alive)))
-		cache, err := cache.LoadCache(cacheOpts.Path, time.Minute*time.Duration(cacheOpts.Alive))
+		с, err := cache.LoadCache(cacheOpts.Path, time.Minute*time.Duration(cacheOpts.Alive))
 		if err != nil {
 			return nil, fmt.Errorf("can't load cache: %w", err)
 		}
-		api.Cache = cache
+		api.Cache = с
 	}
 
 	return api, nil

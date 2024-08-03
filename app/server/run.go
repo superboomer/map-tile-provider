@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/superboomer/map-tile-provider/app/options"
 	"github.com/superboomer/map-tile-provider/app/server/api"
@@ -29,7 +30,12 @@ func Run(ctx context.Context, logger *zap.Logger, opts *options.Opts) error {
 	var s = &Server{
 		options: opts,
 		logger:  logger,
-		server:  &http.Server{Addr: fmt.Sprintf(":%s", opts.APIPort), Handler: nil},
+		server: &http.Server{
+			Addr:         fmt.Sprintf(":%s", opts.APIPort),
+			Handler:      nil,
+			ReadTimeout:  10 * time.Second, // Set a maximum time to read the request headers
+			WriteTimeout: 10 * time.Second, // Set a maximum time to write the response
+		},
 	}
 
 	var md = &middleware.MD{Logger: logger}
