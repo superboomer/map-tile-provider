@@ -8,7 +8,9 @@ import (
 )
 
 // MockProvider is a mock implementation of the Provider interface for testing.
-type MockProvider struct{}
+type MockProvider struct {
+	name string
+}
 
 func (mp *MockProvider) GetTile(lat, long, scale float64) tile.Tile {
 	return tile.Tile{} // Return an empty tile for testing purposes.
@@ -23,7 +25,7 @@ func (mp *MockProvider) MaxZoom() int {
 }
 
 func (mp *MockProvider) Name() string {
-	return "name"
+	return mp.name
 }
 
 func (mp *MockProvider) GetRequest(t *tile.Tile) *http.Request {
@@ -41,7 +43,7 @@ func TestCreateProviderList(t *testing.T) {
 // TestRegister tests the Register method of ProviderList.
 func TestRegister(t *testing.T) {
 	pl := CreateProviderList()
-	mockProvider := &MockProvider{}
+	mockProvider := &MockProvider{name: "provider1"}
 
 	// Test registering a new provider
 	err := pl.Register(mockProvider)
@@ -61,7 +63,7 @@ func TestRegister(t *testing.T) {
 // TestGet tests the Get method of ProviderList.
 func TestGet(t *testing.T) {
 	pl := CreateProviderList()
-	mockProvider := &MockProvider{}
+	mockProvider := &MockProvider{name: "provider1"}
 
 	// Register a provider
 	pl.Register(mockProvider)
@@ -89,9 +91,9 @@ func TestGetAllNames(t *testing.T) {
 	pl := CreateProviderList()
 
 	// Register some mock providers
-	pl.Register(&MockProvider{})
-	pl.Register(&MockProvider{})
-	pl.Register(&MockProvider{})
+	pl.Register(&MockProvider{name: "ProviderA"})
+	pl.Register(&MockProvider{name: "ProviderB"})
+	pl.Register(&MockProvider{name: "ProviderC"})
 
 	// Call GetAllNames
 	names := pl.GetAllNames()

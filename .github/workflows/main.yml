@@ -19,7 +19,7 @@ jobs:
         with:
           version: latest
 
-  deploy:
+  build:
     runs-on: ubuntu-latest
     needs: test
     steps:
