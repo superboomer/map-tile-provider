@@ -1,0 +1,91 @@
+info:
+  contact: {}
+  description: This is a easy HTTP API which easy provide sat maps from different
+    vendors (Yandex Maps, Google Maps, ArcGIS)
+  termsOfService: http://superboomer.ru
+  title: Map Satellite provider
+  version: 1.0.0
+paths:
+  /healthcheck:
+    get:
+      consumes:
+      - application/json
+      description: just return 200 with string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: service ok
+          headers:
+            X-Request-Id:
+              description: request_id
+              type: string
+          schema:
+            type: string
+      summary: handler for health check
+  /map:
+    get:
+      consumes:
+      - text/plain
+      description: return merged satellite tiles in one image
+      parameters:
+      - description: Map vendor
+        in: query
+        name: vendor
+        required: true
+        type: string
+      - description: latitude
+        in: query
+        name: lat
+        required: true
+        type: number
+      - description: longitude
+        in: query
+        name: long
+        required: true
+        type: number
+      - description: scale of image
+        in: query
+        name: zoom
+        required: true
+        type: integer
+      - default: 3
+        description: count of tile of result image square
+        in: query
+        maximum: 10
+        minimum: 1
+        name: side
+        type: integer
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: OK
+          headers:
+            X-Request-Id:
+              description: request_id
+              type: string
+          schema:
+            type: file
+      summary: handler for generating satellite map for specified lat long and from
+        specified vendor
+  /provider:
+    get:
+      consumes:
+      - text/plain
+      description: reutrn JSON array with avalible provders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            X-Request-Id:
+              description: request_id
+              type: string
+          schema:
+            items:
+              type: string
+            type: array
+      summary: handler return all registered providers name
+swagger: "2.0"

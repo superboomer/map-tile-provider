@@ -1,0 +1,132 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a easy HTTP API which easy provide sat maps from different vendors (Yandex Maps, Google Maps, ArcGIS)",
+        "title": "Map Satellite provider",
+        "termsOfService": "http://superboomer.ru",
+        "contact": {},
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/healthcheck": {
+            "get": {
+                "description": "just return 200 with string",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "handler for health check",
+                "responses": {
+                    "200": {
+                        "description": "service ok",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "headers": {
+                            "X-Request-Id": {
+                                "type": "string",
+                                "description": "request_id"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/map": {
+            "get": {
+                "description": "return merged satellite tiles in one image",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "image/jpeg"
+                ],
+                "summary": "handler for generating satellite map for specified lat long and from specified vendor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Map vendor",
+                        "name": "vendor",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "latitude",
+                        "name": "lat",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "longitude",
+                        "name": "long",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "scale of image",
+                        "name": "zoom",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "maximum": 10,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 3,
+                        "description": "count of tile of result image square",
+                        "name": "side",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        },
+                        "headers": {
+                            "X-Request-Id": {
+                                "type": "string",
+                                "description": "request_id"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/provider": {
+            "get": {
+                "description": "reutrn JSON array with avalible provders",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "handler return all registered providers name",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "headers": {
+                            "X-Request-Id": {
+                                "type": "string",
+                                "description": "request_id"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
