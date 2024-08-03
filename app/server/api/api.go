@@ -13,7 +13,7 @@ import (
 // API represent struct for business logic
 type API struct {
 	Cache     *cache.Cache
-	Providers *provider.ProviderList
+	Providers *provider.List
 	Logger    *zap.Logger
 }
 

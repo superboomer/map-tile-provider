@@ -7,6 +7,7 @@ import (
 	"github.com/superboomer/map-tile-provider/app/tile"
 )
 
+// GoogleLoader implement Provider interface for Google provider
 type GoogleLoader struct {
 	name    string
 	maxJobs int
@@ -14,6 +15,7 @@ type GoogleLoader struct {
 	url     string
 }
 
+// Google return Google provider
 func Google() Provider {
 	return GoogleLoader{
 		name:    "google",
@@ -23,6 +25,7 @@ func Google() Provider {
 	}
 }
 
+// GetTile calculate tile XYZ
 func (l GoogleLoader) GetTile(lat, long, scale float64) tile.Tile {
 
 	tileX, tileY := tile.ConvertToTile(lat, long, scale, &tile.ElipsSpherical)
@@ -34,21 +37,25 @@ func (l GoogleLoader) GetTile(lat, long, scale float64) tile.Tile {
 	}
 }
 
+// MaxJobs return count of max tile downloading per request
 func (l GoogleLoader) MaxJobs() int {
 	return l.maxJobs
 }
 
+// MaxZoom return max zoom for specified provider
 func (l GoogleLoader) MaxZoom() int {
 	return l.maxZoom
 }
 
+// Name return provider name
 func (l GoogleLoader) Name() string {
 	return l.name
 }
 
+// GetRequest build http request for specified Tile
 func (l GoogleLoader) GetRequest(t *tile.Tile) *http.Request {
 
-	req, _ := http.NewRequest(http.MethodGet, l.url, nil)
+	req, _ := http.NewRequest(http.MethodGet, l.url, http.NoBody)
 
 	q := req.URL.Query()
 	q.Add("x", fmt.Sprintf("%d", t.X))
