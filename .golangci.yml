@@ -1,17 +1,10 @@
 run:
   timeout: 5m
-  output:
-    format: tab
-  skip-dirs:
-    - vendor
 
 linters-settings:
   govet:
-    check-shadowing: true
-  golint:
-    min-confidence: 0.1
-  maligned:
-    suggest-new: true
+    enable:
+      - shadow
   goconst:
     min-len: 2
     min-occurrences: 2
@@ -33,25 +26,21 @@ linters-settings:
 
 linters:
   enable:
-    - megacheck
-    - golint
+    - staticcheck
+    - revive
     - govet
     - unconvert
-    - megacheck
-    - structcheck
-    - gas
+    - unused
+    - gosec
     - gocyclo
     - dupl
     - misspell
     - unparam
-    - varcheck
-    - deadcode
     - typecheck
     - ineffassign
-    - varcheck
     - stylecheck
     - gochecknoinits
-    - scopelint
+    - exportloopref
     - gocritic
     - nakedret
     - gosimple
@@ -60,18 +49,26 @@ linters:
   disable-all: true
 
 issues:
+  exclude-dirs:
+    - vendor
   exclude-rules:
     - text: "at least one file in a package should have a package comment"
       linters:
         - stylecheck
-    - text: "should have a package comment, unless it's in another file for this package"
+    - text: "should have a package comment"
       linters:
-        - golint
+        - revive
     - path: _test\.go
       linters:
         - gosec
         - dupl
+    - linters:
+        - unparam
+        - unused
+        - revive
+      path: _test\.go$
+      text: "unused-parameter"
   exclude-use-default: false
 
 service:
-  golangci-lint-version: 1.31.x
+  golangci-lint-version: 1.43.x
