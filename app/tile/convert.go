@@ -4,16 +4,20 @@ import (
 	"math"
 )
 
+// Elips contains eccentrcity for calculating
 type Elips struct {
 	Eccentricity float64
 }
 
 var (
-	ElipsWGS84     = Elips{Eccentricity: 0.08181919084262157} // WGS84 Eccentricity
-	ElipsSpherical = Elips{Eccentricity: 0}                   // Spherical Eccentricity
+	// ElipsWGS84 mercator WGS84 Eccentricity
+	ElipsWGS84 = Elips{Eccentricity: 0.08181919084262157}
+	// ElipsSpherical mercator for spherical Eccentricity
+	ElipsSpherical = Elips{Eccentricity: 0}
 )
 
-func ConvertToTile(lat, long float64, zoom float64, proj *Elips) (int, int) {
+// ConvertToTile convert latitude and longtitude to XYZ tile for specified mercator projection
+func ConvertToTile(lat, long, zoom float64, proj *Elips) (x, y int) {
 	rho := math.Pow(2, zoom+8) / 2
 	beta := lat * math.Pi / 180
 
@@ -23,5 +27,8 @@ func ConvertToTile(lat, long float64, zoom float64, proj *Elips) (int, int) {
 	xP := rho * (1 + long/180)
 	yP := rho * (1 - math.Log(theta)/math.Pi)
 
-	return int(math.Floor(xP / 256)), int(math.Floor(yP / 256))
+	x = int(math.Floor(xP / 256))
+	y = int(math.Floor(yP / 256))
+
+	return
 }

@@ -13,8 +13,8 @@ type MockProvider struct {
 	RequestFunc  func(t *tile.Tile) *http.Request
 }
 
-func (m *MockProvider) MaxJobs() int {
-	return m.MaxJobsCount
+func (mp *MockProvider) MaxJobs() int {
+	return mp.MaxJobsCount
 }
 
 func (mp *MockProvider) MaxZoom() int {
@@ -29,8 +29,8 @@ func (mp *MockProvider) GetTile(lat, long, scale float64) tile.Tile {
 	return tile.Tile{}
 }
 
-func (m *MockProvider) GetRequest(t *tile.Tile) *http.Request {
-	return m.RequestFunc(t)
+func (mp *MockProvider) GetRequest(t *tile.Tile) *http.Request {
+	return mp.RequestFunc(t)
 }
 
 func TestStartMultiDownload_Success(t *testing.T) {
@@ -43,7 +43,7 @@ func TestStartMultiDownload_Success(t *testing.T) {
 	mockProvider := &MockProvider{
 		MaxJobsCount: 2,
 		RequestFunc: func(t *tile.Tile) *http.Request {
-			req, _ := http.NewRequest("GET", ts.URL, nil)
+			req, _ := http.NewRequest("GET", ts.URL, http.NoBody)
 			return req
 		},
 	}
@@ -73,7 +73,7 @@ func TestStartMultiDownload_ErrorHandling(t *testing.T) {
 	mockProvider := &MockProvider{
 		MaxJobsCount: 1,
 		RequestFunc: func(t *tile.Tile) *http.Request {
-			req, _ := http.NewRequest("GET", "http://invalid.url", nil)
+			req, _ := http.NewRequest("GET", "http://invalid.url", http.NoBody)
 			return req
 		},
 	}
@@ -101,7 +101,7 @@ func TestStartMultiDownload_NotFound(t *testing.T) {
 	mockProvider := &MockProvider{
 		MaxJobsCount: 1,
 		RequestFunc: func(t *tile.Tile) *http.Request {
-			req, _ := http.NewRequest("GET", ts.URL, nil)
+			req, _ := http.NewRequest("GET", ts.URL, http.NoBody)
 			return req
 		},
 	}
@@ -130,7 +130,7 @@ func TestStartMultiDownload_BadRequest(t *testing.T) {
 	mockProvider := &MockProvider{
 		MaxJobsCount: 1,
 		RequestFunc: func(t *tile.Tile) *http.Request {
-			req, _ := http.NewRequest("GET", ts.URL, nil)
+			req, _ := http.NewRequest("GET", ts.URL, http.NoBody)
 			return req
 		},
 	}
@@ -160,7 +160,7 @@ func TestStartMultiDownload_ConcurrentDownloads(t *testing.T) {
 	mockProvider := &MockProvider{
 		MaxJobsCount: 2,
 		RequestFunc: func(t *tile.Tile) *http.Request {
-			req, _ := http.NewRequest("GET", ts.URL, nil)
+			req, _ := http.NewRequest("GET", ts.URL, http.NoBody)
 			return req
 		},
 	}
