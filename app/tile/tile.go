@@ -1,5 +1,6 @@
 package tile
 
+// Tile contains coords and image []byte
 type Tile struct {
 	X     int
 	Y     int
@@ -7,6 +8,7 @@ type Tile struct {
 	Image []byte
 }
 
+// GetNearby return all nearby tiles for specified square side
 func (t Tile) GetNearby(side int) []Tile {
 	var tiles []Tile
 
