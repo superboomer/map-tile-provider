@@ -13,12 +13,12 @@ import (
 // API represent struct for business logic
 type API struct {
 	Cache     *cache.Cache
-	Providers *provider.List
+	Providers provider.ListInterface
 	Logger    *zap.Logger
 }
 
-// Init connect to kernel and create API struct
-func Init(logger *zap.Logger, cacheOpts *options.Cache) (*API, error) {
+// CreateAPI create API struct
+func CreateAPI(logger *zap.Logger, cacheOpts *options.Cache) (*API, error) {
 
 	pl := provider.CreateProviderList()
 

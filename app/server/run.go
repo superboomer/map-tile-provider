@@ -19,15 +19,9 @@ type Server struct {
 	server  *http.Server
 }
 
-// Run start program with specified parameters
-func Run(ctx context.Context, logger *zap.Logger, opts *options.Opts) error {
-
-	apiService, err := api.Init(logger, &opts.Cache)
-	if err != nil {
-		return err
-	}
-
-	var s = &Server{
+// NewServer create new Server
+func NewServer(opts *options.Opts, logger *zap.Logger) *Server {
+	return &Server{
 		options: opts,
 		logger:  logger,
 		server: &http.Server{
@@ -37,7 +31,17 @@ func Run(ctx context.Context, logger *zap.Logger, opts *options.Opts) error {
 			WriteTimeout: 10 * time.Second, // Set a maximum time to write the response
 		},
 	}
+}
 
+// Run start program with specified parameters
+func Run(ctx context.Context, logger *zap.Logger, opts *options.Opts) error {
+
+	apiService, err := api.CreateAPI(logger, &opts.Cache)
+	if err != nil {
+		return err
+	}
+
+	var s = NewServer(opts, logger)
 	var md = &middleware.MD{Logger: logger}
 
 	s.logger.Info("service starting")

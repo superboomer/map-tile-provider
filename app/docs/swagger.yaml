@@ -1,4 +1,11 @@
 definitions:
+  api.HealthCheckModel:
+    properties:
+      body:
+        type: string
+      status:
+        type: integer
+    type: object
   api.ProviderModel:
     properties:
       key:
@@ -18,18 +25,18 @@ paths:
     get:
       consumes:
       - application/json
-      description: just return 200 with string
+      description: just return HealthCheckModel with API status
       produces:
       - application/json
       responses:
         "200":
-          description: service ok
+          description: OK
           headers:
             X-Request-Id:
               description: request_id
               type: string
           schema:
-            type: string
+            $ref: '#/definitions/api.HealthCheckModel'
       summary: handler for health check
   /map:
     get:
@@ -95,5 +102,5 @@ paths:
             items:
               $ref: '#/definitions/api.ProviderModel'
             type: array
-      summary: handler return all registered providers name
+      summary: handler return all registered providers
 swagger: "2.0"
