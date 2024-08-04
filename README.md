@@ -7,7 +7,17 @@ of the tile-providers before downloading!
 of OpenStreetMap if you use OSP tiles!
 
 ---
-# ![alt text](assets/icon.png "Logo") **Map Tile Provider**
+<div align="center">
+  <img class="logo" src="https://raw.githubusercontent.com/superboomer/map-tile-provider/master/assets/icon-1024.png" width="128px" height="128px" alt="logo"/>
+  <br>
+  <br>
+  <b>Map Tile Provider</b>
+  <br>
+  <br>
+
+  [![build](https://github.com/superboomer/map-tile-provider/actions/workflows/build.yml/badge.svg)](https://github.com/superboomer/map-tile-provider/actions/workflows/build.yml)&nbsp;[![Go Report Card](https://goreportcard.com/badge/github.com/superboomer/map-tile-provider)](https://goreportcard.com/report/github.com/superboomer/map-tile-provider)
+</div>
+
 
 ---
 #### Environment variables
