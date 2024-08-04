@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/healthcheck": {
             "get": {
-                "description": "just return 200 with string",
+                "description": "just return HealthCheckModel with API status",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,9 +27,9 @@ const docTemplate = `{
                 "summary": "handler for health check",
                 "responses": {
                     "200": {
-                        "description": "service ok",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.HealthCheckModel"
                         },
                         "headers": {
                             "X-Request-Id": {
@@ -115,7 +115,7 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "handler return all registered providers name",
+                "summary": "handler return all registered providers",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -137,6 +137,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.HealthCheckModel": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "api.ProviderModel": {
             "type": "object",
             "properties": {

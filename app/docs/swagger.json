@@ -9,7 +9,7 @@
     "paths": {
         "/healthcheck": {
             "get": {
-                "description": "just return 200 with string",
+                "description": "just return HealthCheckModel with API status",
                 "consumes": [
                     "application/json"
                 ],
@@ -19,9 +19,9 @@
                 "summary": "handler for health check",
                 "responses": {
                     "200": {
-                        "description": "service ok",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.HealthCheckModel"
                         },
                         "headers": {
                             "X-Request-Id": {
@@ -107,7 +107,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "handler return all registered providers name",
+                "summary": "handler return all registered providers",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -129,6 +129,17 @@
         }
     },
     "definitions": {
+        "api.HealthCheckModel": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "api.ProviderModel": {
             "type": "object",
             "properties": {

@@ -19,6 +19,12 @@ type Provider interface {
 	GetRequest(t *tile.Tile) *http.Request
 }
 
+// ListInterface is a provider list
+type ListInterface interface {
+	GetAllKey() []string
+	Get(key string) (Provider, error)
+}
+
 // List is a map with all registered providers
 type List map[string]Provider
 
