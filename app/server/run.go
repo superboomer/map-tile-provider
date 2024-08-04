@@ -36,7 +36,7 @@ func NewServer(opts *options.Opts, logger *zap.Logger) *Server {
 // Run start program with specified parameters
 func Run(ctx context.Context, logger *zap.Logger, opts *options.Opts) error {
 
-	apiService, err := api.Init(logger, &opts.Cache)
+	apiService, err := api.CreateAPI(logger, &opts.Cache)
 	if err != nil {
 		return err
 	}

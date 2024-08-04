@@ -17,8 +17,8 @@ type API struct {
 	Logger    *zap.Logger
 }
 
-// Init connect to kernel and create API struct
-func Init(logger *zap.Logger, cacheOpts *options.Cache) (*API, error) {
+// CreateAPI create API struct
+func CreateAPI(logger *zap.Logger, cacheOpts *options.Cache) (*API, error) {
 
 	pl := provider.CreateProviderList()
 
