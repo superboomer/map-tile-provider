@@ -15,7 +15,7 @@ of OpenStreetMap if you use OSP tiles!
   <br>
   <br>
 
-  [![build](https://github.com/superboomer/map-tile-provider/actions/workflows/build.yml/badge.svg)](https://github.com/superboomer/map-tile-provider/actions/workflows/build.yml)&nbsp;[![Go Report Card](https://goreportcard.com/badge/github.com/superboomer/map-tile-provider)](https://goreportcard.com/report/github.com/superboomer/map-tile-provider)
+  [![build](https://github.com/superboomer/map-tile-provider/actions/workflows/build.yml/badge.svg)](https://github.com/superboomer/map-tile-provider/actions/workflows/build.yml)&nbsp;[![Go Report Card](https://goreportcard.com/badge/github.com/superboomer/map-tile-provider)](https://goreportcard.com/report/github.com/superboomer/map-tile-provider)&nbsp;[![Coverage Status](https://coveralls.io/repos/github/superboomer/map-tile-provider/badge.svg?branch=master)](https://coveralls.io/github/superboomer/map-tile-provider?branch=master)
 </div>
 
 
