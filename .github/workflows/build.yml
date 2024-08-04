@@ -25,11 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run Unit Tests
+      - name: Run Tests
         run: |
-              go fmt $(go list ./... | grep -v /vendor/)
-              go vet $(go list ./... | grep -v /vendor/)
-              go test -race $(go list ./... | grep -v /vendor/)
+              go test -race -covermode atomic -coverprofile=covprofile ./...
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v3
@@ -41,7 +39,7 @@ jobs:
          go install github.com/mattn/goveralls@latest
 
       - name: submit coverage
-        run: $(go env GOPATH)/bin/goveralls -service="github" -coverprofile=$GITHUB_WORKSPACE/profile.cov
+        run: goveralls -coverprofile=covprofile -service=github
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
