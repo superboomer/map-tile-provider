@@ -14,7 +14,7 @@ import (
 
 func TestLoadCache(t *testing.T) {
 	// Setup test environment
-	tmpDir := "./tmp"
+	tmpDir := os.TempDir()
 	cachePath := filepath.Join(tmpDir, "cache_test")
 	os.MkdirAll(cachePath, 0o600)
 	defer os.RemoveAll(cachePath) // Clean up after test
@@ -31,7 +31,7 @@ func TestLoadCache(t *testing.T) {
 
 func TestSaveTile(t *testing.T) {
 	// Setup test environment
-	tmpDir := "./tmp"
+	tmpDir := os.TempDir()
 	cachePath := filepath.Join(tmpDir, "save_tile_test")
 	os.MkdirAll(cachePath, 0o600)
 	defer os.RemoveAll(cachePath) // Clean up after test
