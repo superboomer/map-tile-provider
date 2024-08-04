@@ -39,7 +39,7 @@ jobs:
          go install github.com/mattn/goveralls@latest
 
       - name: submit coverage
-        run: goveralls -coverprofile=covprofile -service=github
+        run: $(go env GOPATH)/bin/goveralls -service="github" -coverprofile=covprofile
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
