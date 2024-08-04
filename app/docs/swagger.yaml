@@ -1,8 +1,16 @@
+definitions:
+  api.ProviderModel:
+    properties:
+      key:
+        type: string
+      max_zoom:
+        type: integer
+      name:
+        type: string
+    type: object
 info:
   contact: {}
-  description: This is a easy HTTP API which easy provide sat maps from different
-    vendors (Yandex Maps, Google Maps, ArcGIS)
-  termsOfService: http://superboomer.ru
+  description: This is a easy HTTP API which provide map tiles
   title: Map Satellite provider
   version: 1.0.0
 paths:
@@ -44,7 +52,7 @@ paths:
         name: long
         required: true
         type: number
-      - description: scale of image
+      - description: zoom of image
         in: query
         name: zoom
         required: true
@@ -85,7 +93,7 @@ paths:
               type: string
           schema:
             items:
-              type: string
+              $ref: '#/definitions/api.ProviderModel'
             type: array
       summary: handler return all registered providers name
 swagger: "2.0"

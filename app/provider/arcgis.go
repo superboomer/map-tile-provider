@@ -13,12 +13,14 @@ type ArcGISLoader struct {
 	maxZoom int
 	url     string
 	name    string
+	key     string
 }
 
 // ArcGIS return ArcGIS provider
 func ArcGIS() Provider {
 	return ArcGISLoader{
-		name:    "arcgis",
+		name:    "ArcGIS (Satellite)",
+		key:     "arcgis",
 		maxJobs: 5,
 		maxZoom: 19,
 		url:     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile",
@@ -50,6 +52,11 @@ func (l ArcGISLoader) MaxZoom() int {
 // Name return provider name
 func (l ArcGISLoader) Name() string {
 	return l.name
+}
+
+// Key return provider key
+func (l ArcGISLoader) Key() string {
+	return l.key
 }
 
 // GetRequest build http request for specified Tile

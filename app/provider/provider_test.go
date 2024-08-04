@@ -10,6 +10,7 @@ import (
 // MockProvider is a mock implementation of the Provider interface for testing.
 type MockProvider struct {
 	name string
+	key  string
 }
 
 func (mp *MockProvider) GetTile(lat, long, scale float64) tile.Tile {
@@ -26,6 +27,10 @@ func (mp *MockProvider) MaxZoom() int {
 
 func (mp *MockProvider) Name() string {
 	return mp.name
+}
+
+func (mp *MockProvider) Key() string {
+	return mp.key
 }
 
 func (mp *MockProvider) GetRequest(t *tile.Tile) *http.Request {
@@ -96,7 +101,7 @@ func TestGetAllNames(t *testing.T) {
 	pl.Register(&MockProvider{name: "ProviderC"})
 
 	// Call GetAllNames
-	names := pl.GetAllNames()
+	names := pl.GetAllKey()
 
 	// Define the expected names
 	expectedNames := []string{"ProviderA", "ProviderB", "ProviderC"}
@@ -123,7 +128,7 @@ func TestGetAllNamesEmpty(t *testing.T) {
 	pl := CreateProviderList()
 
 	// Call GetAllNames on an empty ProviderList
-	names := pl.GetAllNames()
+	names := pl.GetAllKey()
 
 	// Check if the result is an empty slice
 	if len(names) != 0 {

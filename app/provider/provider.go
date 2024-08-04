@@ -11,6 +11,7 @@ import (
 type Provider interface {
 	GetTile(lat, long, scale float64) tile.Tile
 
+	Key() string
 	Name() string
 	MaxJobs() int
 	MaxZoom() int
@@ -29,30 +30,30 @@ func CreateProviderList() *List {
 
 // Register new Provider in ProviderList
 func (pl List) Register(p Provider) error {
-	_, err := pl.Get(p.Name())
+	_, err := pl.Get(p.Key())
 	if err == nil {
 		return fmt.Errorf("provider %s already exist", p.Name())
 	}
 
-	pl[p.Name()] = p
+	pl[p.Key()] = p
 
 	return nil
 }
 
 // Get return specified by name provider
-func (pl List) Get(name string) (Provider, error) {
-	provider, exists := pl[name]
+func (pl List) Get(key string) (Provider, error) {
+	provider, exists := pl[key]
 	if !exists {
-		return nil, fmt.Errorf("provider %s not found", name)
+		return nil, fmt.Errorf("provider %s not found", key)
 	}
 	return provider, nil
 }
 
-// GetAllNames return all regisitered providers name
-func (pl List) GetAllNames() []string {
-	names := make([]string, 0, len(pl))
-	for name := range pl {
-		names = append(names, name)
+// GetAllKey return all regisitered providers name
+func (pl List) GetAllKey() []string {
+	keys := make([]string, 0, len(pl))
+	for key := range pl {
+		keys = append(keys, key)
 	}
-	return names
+	return keys
 }

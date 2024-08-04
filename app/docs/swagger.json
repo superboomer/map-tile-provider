@@ -1,9 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a easy HTTP API which easy provide sat maps from different vendors (Yandex Maps, Google Maps, ArcGIS)",
+        "description": "This is a easy HTTP API which provide map tiles",
         "title": "Map Satellite provider",
-        "termsOfService": "http://superboomer.ru",
         "contact": {},
         "version": "1.0.0"
     },
@@ -68,7 +67,7 @@
                     },
                     {
                         "type": "integer",
-                        "description": "scale of image",
+                        "description": "zoom of image",
                         "name": "zoom",
                         "in": "query",
                         "required": true
@@ -115,7 +114,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "$ref": "#/definitions/api.ProviderModel"
                             }
                         },
                         "headers": {
@@ -125,6 +124,22 @@
                             }
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.ProviderModel": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "max_zoom": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         }
