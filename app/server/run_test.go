@@ -32,7 +32,7 @@ func TestRunHTTP(t *testing.T) {
 // Test Run
 func TestRun(t *testing.T) {
 	logger := zap.NewNop()
-	opts := &options.Opts{APIPort: "8080"}
+	opts := &options.Opts{APIPort: "8080", Swagger: true}
 
 	ctx, cancel := context.WithCancel(context.Background())
 
