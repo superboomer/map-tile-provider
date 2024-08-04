@@ -10,6 +10,7 @@ import (
 // MockProvider is a mock implementation of the Provider interface for testing.
 type MockProvider struct {
 	name string
+	key  string
 }
 
 func (mp *MockProvider) GetTile(lat, long, scale float64) tile.Tile {
@@ -26,6 +27,10 @@ func (mp *MockProvider) MaxZoom() int {
 
 func (mp *MockProvider) Name() string {
 	return mp.name
+}
+
+func (mp *MockProvider) Key() string {
+	return mp.key
 }
 
 func (mp *MockProvider) GetRequest(t *tile.Tile) *http.Request {
@@ -63,7 +68,7 @@ func TestRegister(t *testing.T) {
 // TestGet tests the Get method of ProviderList.
 func TestGet(t *testing.T) {
 	pl := CreateProviderList()
-	mockProvider := &MockProvider{name: "provider1"}
+	mockProvider := &MockProvider{key: "provider1"}
 
 	// Register a provider
 	pl.Register(mockProvider)
@@ -91,27 +96,27 @@ func TestGetAllNames(t *testing.T) {
 	pl := CreateProviderList()
 
 	// Register some mock providers
-	pl.Register(&MockProvider{name: "ProviderA"})
-	pl.Register(&MockProvider{name: "ProviderB"})
-	pl.Register(&MockProvider{name: "ProviderC"})
+	pl.Register(&MockProvider{key: "ProviderA"})
+	pl.Register(&MockProvider{key: "ProviderB"})
+	pl.Register(&MockProvider{key: "ProviderC"})
 
-	// Call GetAllNames
-	names := pl.GetAllNames()
+	// Call GetAllKey
+	keys := pl.GetAllKey()
 
 	// Define the expected names
-	expectedNames := []string{"ProviderA", "ProviderB", "ProviderC"}
+	expectedKeys := []string{"ProviderA", "ProviderB", "ProviderC"}
 
 	// Check if the result matches the expected names
-	if len(names) != len(expectedNames) {
-		t.Errorf("Expected %d names, got %d", len(expectedNames), len(names))
+	if len(keys) != len(expectedKeys) {
+		t.Errorf("Expected %d names, got %d", len(expectedKeys), len(keys))
 	}
 
 	nameMap := make(map[string]bool)
-	for _, name := range names {
+	for _, name := range keys {
 		nameMap[name] = true
 	}
 
-	for _, expectedName := range expectedNames {
+	for _, expectedName := range expectedKeys {
 		if !nameMap[expectedName] {
 			t.Errorf("Expected name %s not found in result", expectedName)
 		}
@@ -123,7 +128,7 @@ func TestGetAllNamesEmpty(t *testing.T) {
 	pl := CreateProviderList()
 
 	// Call GetAllNames on an empty ProviderList
-	names := pl.GetAllNames()
+	names := pl.GetAllKey()
 
 	// Check if the result is an empty slice
 	if len(names) != 0 {

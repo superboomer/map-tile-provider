@@ -9,7 +9,6 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://superboomer.ru",
         "contact": {},
         "version": "{{.Version}}"
     },
@@ -76,7 +75,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "scale of image",
+                        "description": "zoom of image",
                         "name": "zoom",
                         "in": "query",
                         "required": true
@@ -123,7 +122,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "$ref": "#/definitions/api.ProviderModel"
                             }
                         },
                         "headers": {
@@ -133,6 +132,22 @@ const docTemplate = `{
                             }
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.ProviderModel": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "max_zoom": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         }
@@ -146,7 +161,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Map Satellite provider",
-	Description:      "This is a easy HTTP API which easy provide sat maps from different vendors (Yandex Maps, Google Maps, ArcGIS)",
+	Description:      "This is a easy HTTP API which provide map tiles",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

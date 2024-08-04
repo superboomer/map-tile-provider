@@ -10,6 +10,7 @@ import (
 // OSMLoader implement Provider interface for OpenStreetMap provider
 type OSMLoader struct {
 	name    string
+	key     string
 	maxJobs int
 	maxZoom int
 	url     string
@@ -18,7 +19,8 @@ type OSMLoader struct {
 // OSM return OpenStreetMap provider
 func OSM() Provider {
 	return OSMLoader{
-		name:    "openstreetmap",
+		name:    "OpenStreetMap",
+		key:     "openstreetmap",
 		maxJobs: 5,
 		maxZoom: 19,
 		url:     "https://tile.openstreetmap.org",
@@ -50,6 +52,11 @@ func (l OSMLoader) MaxZoom() int {
 // Name return provider name
 func (l OSMLoader) Name() string {
 	return l.name
+}
+
+// Key return provider key
+func (l OSMLoader) Key() string {
+	return l.key
 }
 
 // GetRequest build http request for specified Tile

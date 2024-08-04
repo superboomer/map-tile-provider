@@ -10,6 +10,7 @@ import (
 // GoogleLoader implement Provider interface for Google provider
 type GoogleLoader struct {
 	name    string
+	key     string
 	maxJobs int
 	maxZoom int
 	url     string
@@ -18,7 +19,8 @@ type GoogleLoader struct {
 // Google return Google provider
 func Google() Provider {
 	return GoogleLoader{
-		name:    "google",
+		name:    "Google Maps (Satellite)",
+		key:     "google",
 		maxJobs: 5,
 		maxZoom: 21,
 		url:     "https://mts1.google.com/vt/lyrs=s",
@@ -50,6 +52,11 @@ func (l GoogleLoader) MaxZoom() int {
 // Name return provider name
 func (l GoogleLoader) Name() string {
 	return l.name
+}
+
+// Key return provider key
+func (l GoogleLoader) Key() string {
+	return l.key
 }
 
 // GetRequest build http request for specified Tile

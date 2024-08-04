@@ -25,6 +25,10 @@ func (mp *MockProvider) Name() string {
 	return "name"
 }
 
+func (mp *MockProvider) Key() string {
+	return "key"
+}
+
 func (mp *MockProvider) GetTile(lat, long, scale float64) tile.Tile {
 	return tile.Tile{}
 }
