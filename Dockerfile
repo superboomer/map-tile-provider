@@ -1,4 +1,4 @@
-FROM golang:alpine as backend
+FROM golang:alpine AS backend
 
 ARG VERSION
 
@@ -11,15 +11,15 @@ WORKDIR /build
 RUN apk add --no-cache --update git tzdata ca-certificates
 
 RUN \
-    version=${VERSION}-$(date +%Y%m%dT%H:%M:%S); fi && \
+    version=${VERSION}-$(date +%Y%m%dT%H:%M:%S) && \
     echo "version=$version" && \
-    cd app && go build -o /build/map-tp -ldflags "-X 'main.Version=${version}'"
+    cd app && go build -o /build/maptp -ldflags "-X 'main.Version=${version}'"
 
 FROM scratch
 
-COPY --from=backend /build/map-tp /srv/map-tp
+COPY --from=backend /build/maptp /srv/maptp
 COPY --from=backend /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=backend /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 WORKDIR /srv
-ENTRYPOINT ["/srv/map-tp"]
+ENTRYPOINT ["/srv/maptp"]
