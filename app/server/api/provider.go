@@ -3,8 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-
-	"go.uber.org/zap"
 )
 
 // providerModel contains data about provider
@@ -22,7 +20,7 @@ type providerModel struct {
 // @Success		200	{array}	providerModel
 // @Header 200 {string} X-Request-Id "request_id"
 // @Router /provider [get]
-func (a *API) Provider(w http.ResponseWriter, req *http.Request) {
+func (a *API) Provider(w http.ResponseWriter, _ *http.Request) {
 
 	var allProviders = make([]providerModel, 0)
 
@@ -35,11 +33,7 @@ func (a *API) Provider(w http.ResponseWriter, req *http.Request) {
 		allProviders = append(allProviders, providerModel{Name: p.Name(), Key: p.ID(), MaxZoom: p.MaxZoom()})
 	}
 
-	results, err := json.Marshal(allProviders)
-	if err != nil {
-		a.Logger.Error("error on provder handler", zap.Error(err), zap.String("req_id", req.Header.Get("X-Request-ID")))
-		return
-	}
+	results, _ := json.Marshal(allProviders)
 
 	w.Header().Set("Content-Type", "application/json")
 	_, _ = w.Write(results)

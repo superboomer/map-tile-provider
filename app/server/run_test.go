@@ -10,7 +10,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// Test RunHTTP
 func TestRunHTTP(t *testing.T) {
 	s := NewServer(&options.Opts{APIPort: "8080"}, zap.NewNop())
 
@@ -28,7 +27,6 @@ func TestRunHTTP(t *testing.T) {
 	}
 }
 
-// Test Run
 func TestRun(t *testing.T) {
 	logger := zap.NewNop()
 	opts := &options.Opts{APIPort: "8080", Swagger: true, Schema: "./../../example/providers.json"}

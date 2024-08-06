@@ -7,7 +7,6 @@ import (
 )
 
 func TestMapList_Register(t *testing.T) {
-	// Initialize MapList
 	list := createProviderList()
 
 	mockProvider := &ProviderMock{
@@ -28,7 +27,6 @@ func TestMapList_Register(t *testing.T) {
 }
 
 func TestMapList_Get(t *testing.T) {
-	// Initialize MapList
 	list := createProviderList()
 
 	mockProvider := &ProviderMock{
@@ -52,7 +50,6 @@ func TestMapList_Get(t *testing.T) {
 }
 
 func TestMapList_GetAllID(t *testing.T) {
-	// Initialize MapList
 	list := createProviderList()
 
 	mockProvider := &ProviderMock{

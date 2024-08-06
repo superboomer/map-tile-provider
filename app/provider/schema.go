@@ -52,7 +52,7 @@ func loadJSONFromHTTP(client *http.Client, urlStr string) ([]schema, error) {
 
 	resp, err := client.Get(parsedUIrl.String())
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch JSON from URL: %w", err)
+		return nil, fmt.Errorf("failed to send http query: %w", err)
 	}
 	defer resp.Body.Close()
 

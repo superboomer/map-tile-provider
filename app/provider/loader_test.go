@@ -7,11 +7,6 @@ import (
 	"github.com/superboomer/map-tile-provider/app/provider"
 )
 
-// Assuming the existence of a generated mock for the List interface named ListMock
-type MockList struct {
-	provider.ListMock
-}
-
 func TestLoadProviderList_Success(t *testing.T) {
 	list, err := provider.LoadProviderList("./../../example/providers.json")
 
