@@ -27,7 +27,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run Tests
         run: |
-              sudo go test -race -covermode atomic -coverprofile=covprofile ./...
+              sudo go test -race -covermode atomic -coverprofile=covprofile_tmp ./...
+              cat $GITHUB_WORKSPACE/covprofile_tmp | grep -v "mocks" | grep -v "_mock" > $GITHUB_WORKSPACE/covprofile
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v3
