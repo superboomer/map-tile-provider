@@ -4,21 +4,7 @@ on:
   push:
     branches:
       - master
-    paths:
-      - ".github/workflows/build.yml"
-      - "app/**"
-      - ".dockerignore"
-      - "docker-init.sh"
-      - "Dockerfile"
-      - "!**.md"
   pull_request:
-    paths:
-      - ".github/workflows/build.yml"
-      - "app/**"
-      - ".dockerignore"
-      - "docker-init.sh"
-      - "Dockerfile"
-      - "!**.md"
 
 jobs:
   test:
