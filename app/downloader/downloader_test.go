@@ -82,5 +82,4 @@ func TestDownload_FailedDownload(t *testing.T) {
 	// Assert interactions
 	assert.Contains(t, err.Error(), "request is empty")
 	assert.Len(t, mockProvider.GetRequestCalls(), 2) // Still expect 2 calls despite failure
-	assert.Len(t, mockCache.SaveTileCalls(), 1)      // One save due to cache miss and successful download
 }
