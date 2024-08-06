@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,9 +14,16 @@ import (
 )
 
 func TestDownload_SuccessfulWithoutCacheHit(t *testing.T) {
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("image data"))
+	}))
+	defer ts.Close()
+
 	mockProvider := &provider.ProviderMock{
 		GetRequestFunc: func(*tile.Tile) *http.Request {
-			req, _ := http.NewRequest(http.MethodGet, "https://example.com", http.NoBody)
+			req, _ := http.NewRequest(http.MethodGet, ts.URL, http.NoBody)
 			return req
 		},
 		MaxJobsFunc: func() int { return 2 },
@@ -42,10 +50,17 @@ func TestDownload_SuccessfulWithoutCacheHit(t *testing.T) {
 }
 
 func TestDownload_FailedDownload(t *testing.T) {
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("image data"))
+	}))
+	defer ts.Close()
+
 	mockProvider := &provider.ProviderMock{
 		GetRequestFunc: func(testTile *tile.Tile) *http.Request {
 			if testTile.X == 1 {
-				req, _ := http.NewRequest(http.MethodGet, "https://example.com", http.NoBody)
+				req, _ := http.NewRequest(http.MethodGet, ts.URL, http.NoBody)
 				return req
 			}
 			return nil
