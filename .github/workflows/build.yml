@@ -2,6 +2,8 @@ name: pipeline
 
 on:
   push:
+    branches:
+      - master
     paths:
       - ".github/workflows/build.yml"
       - "app/**"
