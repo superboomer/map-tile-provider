@@ -67,8 +67,7 @@ func createLogger(opts *options.Log) *zap.Logger {
 		)
 	}
 
-	// encoder := zap.NewProductionEncoderConfig()
-	encoder := zap.NewDevelopmentEncoderConfig()
+	encoder := zap.NewProductionEncoderConfig()
 
 	logCore := zapcore.NewCore(
 		zapcore.NewJSONEncoder(encoder),
