@@ -8,28 +8,42 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/superboomer/map-tile-provider/app/tile"
+	"go.etcd.io/bbolt"
 )
 
 func TestNewCache_Success(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test")
 	defer os.RemoveAll(tmpDir)
 
-	cache, err := NewCache(tmpDir, time.Hour)
+	cache, err := NewCache(tmpDir, time.Hour, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, cache)
 }
 
 func TestNewCache_FailedDir(t *testing.T) {
-	cache, err := NewCache("", time.Hour)
+	cache, err := NewCache("", time.Hour, nil)
 	assert.Error(t, err)
 	assert.Nil(t, cache)
+}
+
+func TestNewCache_FailedIndex(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test")
+	defer os.RemoveAll(tmpDir)
+
+	cache, err := NewCache(tmpDir, time.Hour, nil)
+	assert.NoError(t, err)
+	assert.NotNil(t, cache)
+
+	cache2, err := NewCache(tmpDir, time.Hour, &bbolt.Options{Timeout: time.Second})
+	assert.Error(t, err)
+	assert.Nil(t, cache2)
 }
 
 func TestSaveTile_Success(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save")
 	defer os.RemoveAll(tmpDir)
 
-	cache, err := NewCache(tmpDir, time.Hour)
+	cache, err := NewCache(tmpDir, time.Hour, nil)
 	assert.NoError(t, err)
 
 	testTile := &tile.Tile{X: 1, Y: 2, Z: 3, Image: []byte("test-image")}
@@ -41,7 +55,7 @@ func TestLoadTile_Success(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
 	defer os.RemoveAll(tmpDir)
 
-	cache, err := NewCache(tmpDir, time.Hour)
+	cache, err := NewCache(tmpDir, time.Hour, nil)
 	assert.NoError(t, err)
 
 	testTile := &tile.Tile{X: 1, Y: 2, Z: 3, Image: []byte("test-image")}
@@ -57,7 +71,7 @@ func TestLoadTile_FailedBucketError(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
 	defer os.RemoveAll(tmpDir)
 
-	cache, err := NewCache(tmpDir, time.Hour)
+	cache, err := NewCache(tmpDir, time.Hour, nil)
 	assert.NoError(t, err)
 
 	loadedTile, err := cache.LoadTile("vendor", &tile.Tile{X: 1, Y: 2, Z: 3})
@@ -69,7 +83,7 @@ func TestLoadTile_FailedTileError(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
 	defer os.RemoveAll(tmpDir)
 
-	cache, err := NewCache(tmpDir, time.Hour)
+	cache, err := NewCache(tmpDir, time.Hour, nil)
 	assert.NoError(t, err)
 
 	testTile := &tile.Tile{X: 1, Y: 1, Z: 1, Image: []byte("test-image")}
@@ -85,7 +99,7 @@ func TestSaveImage_Success(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save-image")
 	defer os.RemoveAll(tmpDir)
 
-	cache, err := NewCache(tmpDir, time.Hour)
+	cache, err := NewCache(tmpDir, time.Hour, nil)
 	assert.NoError(t, err)
 
 	testTile := &tile.Tile{X: 1, Y: 2, Z: 3, Image: []byte("test-image")}

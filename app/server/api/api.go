@@ -41,7 +41,7 @@ func CreateAPI(logger *zap.Logger, cacheOpts *options.Cache, providerSource stri
 
 	if cacheOpts.Enable {
 		logger.Info("cache enabled", zap.String("path", cacheOpts.Path), zap.Duration("alive", time.Minute*time.Duration(cacheOpts.Alive)))
-		с, err := cache.NewCache(cacheOpts.Path, time.Minute*time.Duration(cacheOpts.Alive))
+		с, err := cache.NewCache(cacheOpts.Path, time.Minute*time.Duration(cacheOpts.Alive), nil)
 		if err != nil {
 			return nil, fmt.Errorf("can't load cache: %w", err)
 		}

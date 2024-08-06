@@ -30,14 +30,14 @@ type MapCache struct {
 }
 
 // NewCache initializes a new Cache instance
-func NewCache(path string, alive time.Duration) (*MapCache, error) {
+func NewCache(path string, alive time.Duration, indexOpts *bbolt.Options) (*MapCache, error) {
 	err := os.MkdirAll(path, 0o700)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cache directory: %w", err)
 	}
 
 	dbPath := filepath.Join(path, "index.db")
-	db, err := bbolt.Open(dbPath, 0o600, nil)
+	db, err := bbolt.Open(dbPath, 0o600, indexOpts)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open bolt db: %w", err)
 	}
