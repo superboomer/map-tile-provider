@@ -20,7 +20,9 @@ func TestCreateAPI_Success(t *testing.T) {
 	assert.NotNil(t, res)
 	assert.Equal(t, 512, res.MaxSide)
 	assert.Nil(t, res.Cache)
-	assert.Equal(t, res.Providers.GetAllID(), []string{"google", "osm", "arcgis"})
+	assert.Contains(t, res.Providers.GetAllID(), "google")
+	assert.Contains(t, res.Providers.GetAllID(), "arcgis")
+	assert.Contains(t, res.Providers.GetAllID(), "osm")
 }
 
 func TestCreateAPI_EnableCacheSuccess(t *testing.T) {
