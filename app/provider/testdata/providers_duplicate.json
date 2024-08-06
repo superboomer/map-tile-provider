@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Example",
+        "id":"example",
+        "max_jobs": 5,
+        "max_zoom": 21,
+        "proj": "spherical",
+        "url": {
+            "url": "example.com/{x}/{y}/{z}"
+        }
+    },
+    {
+        "name": "Example",
+        "id":"example",
+        "max_jobs": 5,
+        "max_zoom": 21,
+        "proj": "spherical",
+        "url": {
+            "url": "example.com/{x}/{y}/{z}"
+        }
+    }
+]
