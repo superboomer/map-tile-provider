@@ -46,6 +46,7 @@ func NewCache(path string, alive time.Duration, indexOpts *bbolt.Options) (*MapC
 	return &MapCache{db: db, path: path, alive: alive, mutex: sync.RWMutex{}}, nil
 }
 
+// Close close boldDB file
 func (c *MapCache) Close() error {
 	return c.db.Close()
 }
