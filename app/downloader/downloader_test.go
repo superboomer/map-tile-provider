@@ -76,9 +76,9 @@ func TestDownload_FailedDownload(t *testing.T) {
 
 	downloader := NewMapDownloader(http.DefaultClient)
 
-	tiles := []tile.Tile{{X: 1, Y: 2, Z: 3}, {X: 4, Y: 5, Z: 6}}
-	_, err := downloader.Download(mockCache, mockProvider, tiles...)
+	_, _ = downloader.Download(mockCache, mockProvider, []tile.Tile{{X: 1, Y: 2, Z: 3}}...)
 
+	_, err := downloader.Download(mockCache, mockProvider, []tile.Tile{{X: 4, Y: 5, Z: 6}}...)
 	assert.Error(t, err) // Expect an error due to download failure
 	// Assert interactions
 	assert.Contains(t, err.Error(), "request is empty")
