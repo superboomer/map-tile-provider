@@ -45,7 +45,7 @@ of OpenStreetMap if you use OSP tiles!
 
 # **Providers**
 
-Example [providers.json](https://github.com/superboomer/map-tile-provider/blob/master/example) contains 3 providers. *(but you can set up any providers as you wish. also service support loading .json from local FS)*
+Example [providers.json](https://github.com/superboomer/map-tile-provider/blob/master/example/providers.json) contains 3 providers. *(but you can set up any providers as you wish. also service support loading .json from local FS)*
 
 - OpenStreetMap
 - Google Maps (Satellite)
