@@ -78,7 +78,7 @@ jobs:
           docker buildx build --push \
               --build-arg VERSION=${{ steps.version_step.outputs.version_tag }} \
               --platform linux/amd64,linux/arm64 \
-              -t ghcr.io/superboomer/map-tile-provider:${ref} .
+              -t ghcr.io/${{ github.actor }}/map-tile-provider:${ref} .
 
       - name: deploy tagged (latest) to ghcr.io
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -87,5 +87,5 @@ jobs:
           docker buildx build --push \
               --build-arg VERSION=${{ steps.version_step.outputs.version_tag }} \
               --platform linux/amd64,linux/arm64 \
-              -t ghcr.io/superboomer/map-tile-provider:latest \
+              -t ghcr.io/${{ github.actor }}/map-tile-provider:latest \
 
