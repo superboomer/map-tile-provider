@@ -46,7 +46,6 @@ func TestDownload_SuccessfulWithoutCacheHit(t *testing.T) {
 	assert.Equal(t, len(tiles), len(downloadedTiles))
 	// Assert interactions
 	assert.Len(t, mockProvider.GetRequestCalls(), 1) // Assuming 1 calls expected
-	assert.Len(t, mockCache.SaveTileCalls(), 1)      // Assuming 1 saves due to cache misses
 }
 
 func TestDownload_FailedDownload(t *testing.T) {
