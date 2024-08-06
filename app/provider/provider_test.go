@@ -110,3 +110,19 @@ func TestGetRequestWithHeaders(t *testing.T) {
 	assert.Equal(t, req.Header.Get("Authorization"), MockProviderSchemaWithHeaders.Request.Headers[0].Value)
 	assert.Equal(t, req.Header.Get("Content-Type"), MockProviderSchemaWithHeaders.Request.Headers[1].Value)
 }
+
+func TestGetMaxZoom(t *testing.T) {
+	provider, _ := createProvider(&MockProviderSchema)
+
+	req := provider.MaxZoom()
+	assert.NotNil(t, req)
+	assert.Equal(t, MockProviderSchema.MaxZoom, req)
+}
+
+func TestGetMaxJobs(t *testing.T) {
+	provider, _ := createProvider(&MockProviderSchema)
+
+	req := provider.MaxJobs()
+	assert.NotNil(t, req)
+	assert.Equal(t, MockProviderSchema.MaxJobs, req)
+}
