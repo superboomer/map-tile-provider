@@ -150,6 +150,45 @@ func TestMapHandler_InvalidParameterProvider(t *testing.T) {
 	assert.JSONEq(t, expectedBody, rr.Body.String(), "Response body did not match expected JSON")
 }
 
+func TestMapHandler_InvalidParameterSide(t *testing.T) {
+	req, err := http.NewRequest("GET", "/map?provider=example&lat=12.0&long=-74.0060&zoom=1&side=invalid", http.NoBody)
+	assert.NoError(t, err)
+
+	rr := httptest.NewRecorder()
+
+	apiPkg.Map(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+
+	assert.Contains(t, rr.Body.String(), "side parameter error")
+}
+
+func TestMapHandler_InvalidParameterSideMax(t *testing.T) {
+	req, err := http.NewRequest("GET", "/map?provider=example&lat=12.0&long=-74.0060&zoom=1&side=100", http.NoBody)
+	assert.NoError(t, err)
+
+	rr := httptest.NewRecorder()
+
+	apiPkg.Map(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+
+	assert.Contains(t, rr.Body.String(), "side parameter error: must be greater or equal")
+}
+
+func TestMapHandler_InvalidParameterSideMin(t *testing.T) {
+	req, err := http.NewRequest("GET", "/map?provider=example&lat=12.0&long=-74.0060&zoom=1&side=0", http.NoBody)
+	assert.NoError(t, err)
+
+	rr := httptest.NewRecorder()
+
+	apiPkg.Map(rr, req)
+
+	assert.Equal(t, http.StatusBadRequest, rr.Code)
+
+	assert.Contains(t, rr.Body.String(), "side parameter error: must be greater or equal")
+}
+
 func TestMapHandler_ErrorDuringDownload(t *testing.T) {
 
 	// Initialize the API with the mock logger and error DownloadFunc

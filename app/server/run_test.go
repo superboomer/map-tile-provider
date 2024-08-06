@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestRunHTTP(t *testing.T) {
+func TestRunHTTP_Success(t *testing.T) {
 	s := NewServer(&options.Opts{APIPort: "8080"}, zap.NewNop())
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -27,7 +27,7 @@ func TestRunHTTP(t *testing.T) {
 	}
 }
 
-func TestRun(t *testing.T) {
+func TestRun_Success(t *testing.T) {
 	logger := zap.NewNop()
 	opts := &options.Opts{APIPort: "8080", Swagger: true, Schema: "./../../example/providers.json"}
 
@@ -41,5 +41,22 @@ func TestRun(t *testing.T) {
 	err := Run(ctx, logger, opts)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
+	}
+}
+
+func TestRun_Failed(t *testing.T) {
+	logger := zap.NewNop()
+	opts := &options.Opts{APIPort: "8080", Swagger: true, Schema: ""}
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		time.Sleep(100 * time.Millisecond) // Allow server to start
+		cancel()                           // Cancel the context to trigger shutdown
+	}()
+
+	err := Run(ctx, logger, opts)
+	if err == nil {
+		t.Fatalf("expected error, got %v", err)
 	}
 }
