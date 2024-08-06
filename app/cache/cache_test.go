@@ -51,6 +51,19 @@ func TestSaveTile_Success(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestSaveTile_FailedReadOnly(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save")
+	defer os.RemoveAll(tmpDir)
+
+	cache, err := NewCache(tmpDir, time.Hour, &bbolt.Options{ReadOnly: true})
+	assert.NoError(t, err)
+
+	testTile := &tile.Tile{X: 1, Y: 2, Z: 3, Image: []byte("test-image")}
+	err = cache.SaveTile("vendor", testTile)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to update db:")
+}
+
 func TestLoadTile_Success(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
 	defer os.RemoveAll(tmpDir)
