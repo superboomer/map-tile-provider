@@ -40,7 +40,7 @@ func (m *MapDownloader) Merge(side int, centerTile tile.Tile, tiles ...tile.Tile
 		return nil, fmt.Errorf("error occurred during image merging: %w", err)
 	}
 
-	return mergedImage.Bytes(), nil
+	return mergedImage, nil
 }
 
 // filterAndSortTiles filters out tiles to ensure the center tile exists and sorts them.
@@ -67,7 +67,7 @@ func filterAndSortTiles(tiles []tile.Tile, centerTile tile.Tile) *imageTileSlice
 }
 
 // createMergedImage creates a merged image from sorted tiles around a center tile.
-func createMergedImage(side int, centerTile tile.Tile, coordsData *imageTileSlice) (*bytes.Buffer, error) {
+func createMergedImage(side int, centerTile tile.Tile, coordsData *imageTileSlice) ([]byte, error) {
 	images := prepareImageGrid(side)
 	for _, file := range *coordsData {
 		img, _, err := image.Decode(bytes.NewReader(file.Image))
@@ -95,7 +95,7 @@ func prepareImageGrid(side int) [][]image.Image {
 }
 
 // mergeImagesIntoResult merges individual tile images into a single image.
-func mergeImagesIntoResult(images [][]image.Image, side int) (*bytes.Buffer, error) {
+func mergeImagesIntoResult(images [][]image.Image, side int) ([]byte, error) {
 	totalWidth := images[0][0].Bounds().Dx() * side
 	totalHeight := images[0][0].Bounds().Dy() * side
 	result := image.NewRGBA(image.Rect(0, 0, totalWidth, totalHeight))
@@ -121,5 +121,5 @@ func mergeImagesIntoResult(images [][]image.Image, side int) (*bytes.Buffer, err
 		return nil, fmt.Errorf("error occurred with encoding new image: %w", err)
 	}
 
-	return resultImage, nil
+	return resultImage.Bytes(), nil
 }
