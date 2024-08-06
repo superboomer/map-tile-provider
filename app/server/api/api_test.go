@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,9 +24,9 @@ func TestCreateAPI_Success(t *testing.T) {
 }
 
 func TestCreateAPI_EnableCacheSuccess(t *testing.T) {
-	tmpDir := "./tmp/cache"
+	tmpDir := filepath.Join(os.TempDir(), "cache-test")
 	// Execute
-	res, err := api.CreateAPI(zap.NewNop(), &options.Cache{Enable: true, Path: "./tmp/cache", Alive: 60}, "./../../../example/providers.json", 512)
+	res, err := api.CreateAPI(zap.NewNop(), &options.Cache{Enable: true, Path: tmpDir, Alive: 60}, "./../../../example/providers.json", 512)
 	defer os.RemoveAll(tmpDir)
 	// Assert
 	assert.NoError(t, err)
