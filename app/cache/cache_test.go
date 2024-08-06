@@ -55,6 +55,11 @@ func TestSaveTile_FailedReadOnly(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save")
 	defer os.RemoveAll(tmpDir)
 
+	createCacheFile, err := NewCache(tmpDir, time.Hour, nil)
+	assert.NoError(t, err)
+
+	assert.NoError(t, createCacheFile.Close())
+
 	cache, err := NewCache(tmpDir, time.Hour, &bbolt.Options{ReadOnly: true})
 	assert.NoError(t, err)
 

@@ -18,6 +18,9 @@ var _ Cache = &CacheMock{}
 //
 //		// make and configure a mocked Cache
 //		mockedCache := &CacheMock{
+//			CloseFunc: func() error {
+//				panic("mock out the Close method")
+//			},
 //			LoadTileFunc: func(vendor string, t *tile.Tile) ([]byte, error) {
 //				panic("mock out the LoadTile method")
 //			},
@@ -31,6 +34,9 @@ var _ Cache = &CacheMock{}
 //
 //	}
 type CacheMock struct {
+	// CloseFunc mocks the Close method.
+	CloseFunc func() error
+
 	// LoadTileFunc mocks the LoadTile method.
 	LoadTileFunc func(vendor string, t *tile.Tile) ([]byte, error)
 
@@ -39,6 +45,9 @@ type CacheMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// Close holds details about calls to the Close method.
+		Close []struct {
+		}
 		// LoadTile holds details about calls to the LoadTile method.
 		LoadTile []struct {
 			// Vendor is the vendor argument value.
@@ -54,8 +63,36 @@ type CacheMock struct {
 			T *tile.Tile
 		}
 	}
+	lockClose    sync.RWMutex
 	lockLoadTile sync.RWMutex
 	lockSaveTile sync.RWMutex
+}
+
+// Close calls CloseFunc.
+func (mock *CacheMock) Close() error {
+	if mock.CloseFunc == nil {
+		panic("CacheMock.CloseFunc: method is nil but Cache.Close was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockClose.Lock()
+	mock.calls.Close = append(mock.calls.Close, callInfo)
+	mock.lockClose.Unlock()
+	return mock.CloseFunc()
+}
+
+// CloseCalls gets all the calls that were made to Close.
+// Check the length with:
+//
+//	len(mockedCache.CloseCalls())
+func (mock *CacheMock) CloseCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockClose.RLock()
+	calls = mock.calls.Close
+	mock.lockClose.RUnlock()
+	return calls
 }
 
 // LoadTile calls LoadTileFunc.

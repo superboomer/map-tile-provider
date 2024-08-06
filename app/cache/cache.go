@@ -19,6 +19,7 @@ import (
 type Cache interface {
 	SaveTile(vendor string, t *tile.Tile) error
 	LoadTile(vendor string, t *tile.Tile) ([]byte, error)
+	Close() error
 }
 
 // MapCache manages cached tiles with both in-memory and persistent storage
@@ -43,6 +44,10 @@ func NewCache(path string, alive time.Duration, indexOpts *bbolt.Options) (*MapC
 	}
 
 	return &MapCache{db: db, path: path, alive: alive, mutex: sync.RWMutex{}}, nil
+}
+
+func (c *MapCache) Close() error {
+	return c.db.Close()
 }
 
 // SaveTile saves a tile to both BoltDB and disk storage
