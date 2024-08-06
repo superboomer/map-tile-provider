@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Example",
+        "id":"example",
+        "max_jobs": 5,
+        "max_zoom": 21,
+        "proj": "unknown",
+        "url": {
+            "url": "example.com/{x}/{y}/{z}"
+        }
+    }
+]

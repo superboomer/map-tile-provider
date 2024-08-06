@@ -2,6 +2,8 @@ name: pipeline
 
 on:
   push:
+    branches:
+      - master
     paths:
       - ".github/workflows/build.yml"
       - "app/**"
@@ -25,7 +27,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run Tests
         run: |
-              sudo go test -race -covermode atomic -coverprofile=covprofile ./...
+              sudo go test -race -covermode atomic -coverprofile=covprofile_tmp ./...
+              cat $GITHUB_WORKSPACE/covprofile_tmp | grep -v "mocks" | grep -v "_mock" > $GITHUB_WORKSPACE/covprofile
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v3
@@ -78,7 +81,7 @@ jobs:
           docker buildx build --push \
               --build-arg VERSION=${{ steps.version_step.outputs.version_tag }} \
               --platform linux/amd64,linux/arm64 \
-              -t ghcr.io/superboomer/map-tile-provider:${ref} .
+              -t ghcr.io/${{ github.actor }}/map-tile-provider:${ref} .
 
       - name: deploy tagged (latest) to ghcr.io
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -87,5 +90,5 @@ jobs:
           docker buildx build --push \
               --build-arg VERSION=${{ steps.version_step.outputs.version_tag }} \
               --platform linux/amd64,linux/arm64 \
-              -t ghcr.io/superboomer/map-tile-provider:latest \
+              -t ghcr.io/${{ github.actor }}/map-tile-provider:latest \
 

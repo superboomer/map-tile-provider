@@ -8,13 +8,11 @@ require (
 	github.com/swaggo/swag v1.16.3
 	github.com/umputun/go-flags v1.5.1
 	go.uber.org/zap v1.27.0
-	golang.org/x/time v0.5.0
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/objx v0.5.2 // indirect
 )
 
 require (

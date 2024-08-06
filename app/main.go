@@ -37,12 +37,16 @@ func main() {
 
 	logger.Info("build version", zap.String("build", Version))
 
+	if err := run(Opts, logger); err != nil {
+		logger.Fatal("fatal error", zap.Error(err))
+	}
+}
+
+func run(opts *options.Opts, logger *zap.Logger) error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	if err := server.Run(ctx, logger, Opts); err != nil {
-		logger.Fatal("fatal error", zap.Error(err))
-	}
+	return server.Run(ctx, logger, opts)
 }
 
 func createLogger(opts *options.Log) *zap.Logger {

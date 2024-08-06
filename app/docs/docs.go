@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/healthcheck": {
             "get": {
-                "description": "just return HealthCheckModel with API status",
+                "description": "just return HealthCheckModel with API status (always return 200)",
                 "consumes": [
                     "application/json"
                 ],
@@ -29,7 +29,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.HealthCheckModel"
+                            "$ref": "#/definitions/api.healthCheckModel"
                         },
                         "headers": {
                             "X-Request-Id": {
@@ -54,8 +54,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Map vendor",
-                        "name": "vendor",
+                        "description": "Map provider",
+                        "name": "provider",
                         "in": "query",
                         "required": true
                     },
@@ -102,6 +102,12 @@ const docTemplate = `{
                                 "description": "request_id"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.mapErrorModel"
+                        }
                     }
                 }
             }
@@ -122,7 +128,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.ProviderModel"
+                                "$ref": "#/definitions/api.providerModel"
                             }
                         },
                         "headers": {
@@ -137,7 +143,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "api.HealthCheckModel": {
+        "api.healthCheckModel": {
             "type": "object",
             "properties": {
                 "body": {
@@ -148,7 +154,18 @@ const docTemplate = `{
                 }
             }
         },
-        "api.ProviderModel": {
+        "api.mapErrorModel": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.providerModel": {
             "type": "object",
             "properties": {
                 "key": {

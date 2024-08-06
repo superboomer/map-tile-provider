@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+
+  map-tile-provider:
+    image: ghcr.io/superboomer/map-tile-provider:latest
+    container_name: map-tile-provider
+    restart: unless-stopped
+    environment:
+      - SCHEMA=https://raw.githubusercontent.com/superboomer/map-tile-provider/master/example/providers.json
+    ports:
+      - "8080:8080"

@@ -8,7 +8,7 @@ of OpenStreetMap if you use OSP tiles!
 
 ---
 <div align="center">
-  <img class="logo" src="https://raw.githubusercontent.com/superboomer/map-tile-provider/master/assets/icon-1024.png" width="128px" height="128px" alt="logo"/>
+  <img class="logo" src="https://raw.githubusercontent.com/superboomer/map-tile-provider/master/assets/logo.png" width="128px" height="128px" alt="logo"/>
   <br>
   <br>
   <b>Map Tile Provider</b>
@@ -35,19 +35,23 @@ of OpenStreetMap if you use OSP tiles!
 | CACHE_PATH | a path for cache directory     | ***Optional***  | ./data/cache
 | CACHE_ALIVE | cache alive in minutes     | ***Optional***  | 14400
 |  ***OTHERS*** |
+| SCHEMA | providers specs    |  ***Required***  | *NO_DEFAULT*
 | API_PORT | api port    |  ***Optional***  | 8080
 | SWAGGER | swagger docs    |  ***Optional***  | false
-> All environment variables are available in [source code](https://github.com/mightrl/media-storage-service/blob/master/app/options/opt.go)
+| MAX_SIDE | max square side    |  ***Optional***  | 10
+> All environment variables are available in [source code](https://github.com/superboomer/map-tile-provider/blob/master/app/options/opt.go)
 ***
 
 
 # **Providers**
 
-- OpenStreetMap
-- Google Maps (satellite)
-- ArcGIS (satellite)
+Example [providers.json](https://github.com/superboomer/map-tile-provider/blob/master/example/providers.json) contains 3 providers. *(but you can set up any providers as you wish. also service support loading .json from local FS)*
 
- > Don't forget about providers ToS
+- OpenStreetMap
+- Google Maps (Satellite)
+- ArcGIS (Satellite)
+
+> Don't forget about providers ToS
 
 # **Docker Deploy**
 
@@ -61,8 +65,12 @@ services:
     image: ghcr.io/superboomer/map-tile-provider:latest
     container_name: map-tile-provider
     restart: unless-stopped
+    environment:
+      - SCHEMA=https://raw.githubusercontent.com/superboomer/map-tile-provider/master/example/providers.json
     ports:
       - "8080:8080"
 ```
+> Full example [here](https://github.com/superboomer/map-tile-provider/blob/master/example)
+
 ***
 

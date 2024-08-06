@@ -1,0 +1,50 @@
+[
+    {
+        "name": "Google Maps (Satellite)",
+        "id":"google",
+        "max_jobs": 5,
+        "max_zoom": 21,
+        "proj": "spherical",
+        "url": {
+            "url": "https://mts1.google.com/vt/lyrs=s?x={x}&y={y}&z={z}"
+        }
+    },
+    {
+        "name": "OpenStreetMap",
+        "id":"osm",
+        "max_jobs": 5,
+        "max_zoom": 19,
+        "proj": "spherical",
+        "request": {
+            "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            "headers": [
+                {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+                },
+                {
+                    "key": "Accept",
+                    "value": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
+                },
+                {
+                    "key": "Accept-Encoding",
+                    "value": "gzip, deflate, br, zstd"
+                },
+                {
+                    "key": "Accept-Language",
+                    "value": "en-US,en;q=0.9"
+                }
+            ]
+        }
+    },
+    {
+        "name": "ArcGIS (Satellite)",
+        "id":"arcgis",
+        "max_jobs": 5,
+        "max_zoom": 19,
+        "proj": "spherical",
+        "request": {
+            "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        }
+    }
+]

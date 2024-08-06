@@ -1,12 +1,19 @@
 definitions:
-  api.HealthCheckModel:
+  api.healthCheckModel:
     properties:
       body:
         type: string
       status:
         type: integer
     type: object
-  api.ProviderModel:
+  api.mapErrorModel:
+    properties:
+      body:
+        type: string
+      status:
+        type: integer
+    type: object
+  api.providerModel:
     properties:
       key:
         type: string
@@ -25,7 +32,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: just return HealthCheckModel with API status
+      description: just return HealthCheckModel with API status (always return 200)
       produces:
       - application/json
       responses:
@@ -36,7 +43,7 @@ paths:
               description: request_id
               type: string
           schema:
-            $ref: '#/definitions/api.HealthCheckModel'
+            $ref: '#/definitions/api.healthCheckModel'
       summary: handler for health check
   /map:
     get:
@@ -44,9 +51,9 @@ paths:
       - text/plain
       description: return merged satellite tiles in one image
       parameters:
-      - description: Map vendor
+      - description: Map provider
         in: query
-        name: vendor
+        name: provider
         required: true
         type: string
       - description: latitude
@@ -82,6 +89,10 @@ paths:
               type: string
           schema:
             type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.mapErrorModel'
       summary: handler for generating satellite map for specified lat long and from
         specified vendor
   /provider:
@@ -100,7 +111,7 @@ paths:
               type: string
           schema:
             items:
-              $ref: '#/definitions/api.ProviderModel'
+              $ref: '#/definitions/api.providerModel'
             type: array
       summary: handler return all registered providers
 swagger: "2.0"

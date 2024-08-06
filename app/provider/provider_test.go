@@ -1,137 +1,128 @@
 package provider
 
 import (
-	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/superboomer/map-tile-provider/app/tile"
 )
 
-// MockProvider is a mock implementation of the Provider interface for testing.
-type MockProvider struct {
-	name string
-	key  string
+// MockProviderSchema simulates a provider schema for testing
+var MockProviderSchema = schema{
+	Name:       "MockProvider",
+	ID:         "mp",
+	MaxJobs:    100,
+	MaxZoom:    19,
+	Projection: "wgs84",
+	Request: reqSchema{
+		URL: "https://example.com/{x}/{y}/{z}.png",
+	},
 }
 
-func (mp *MockProvider) GetTile(lat, long, scale float64) tile.Tile {
-	return tile.Tile{} // Return an empty tile for testing purposes.
-}
+// TestCreateProvider tests the creation of a MapProvider instance, including error cases
+func TestCreateProvider(t *testing.T) {
+	// Test successful creation
+	provider, err := createProvider(&MockProviderSchema)
+	assert.NoError(t, err)
+	assert.NotNil(t, provider)
+	assert.Equal(t, MockProviderSchema.Name, provider.Name())
+	assert.Equal(t, MockProviderSchema.ID, provider.ID())
 
-func (mp *MockProvider) MaxJobs() int {
-	return 1 // Return a fixed number of jobs for testing.
-}
-
-func (mp *MockProvider) MaxZoom() int {
-	return 20 // Return a fixed number of jobs for testing.
-}
-
-func (mp *MockProvider) Name() string {
-	return mp.name
-}
-
-func (mp *MockProvider) Key() string {
-	return mp.key
-}
-
-func (mp *MockProvider) GetRequest(t *tile.Tile) *http.Request {
-	return &http.Request{} // Return a dummy request for testing.
-}
-
-// TestCreateProviderList tests the CreateProviderList function.
-func TestCreateProviderList(t *testing.T) {
-	pl := CreateProviderList()
-	if pl == nil {
-		t.Error("Expected non-nil ProviderList")
-	}
-}
-
-// TestRegister tests the Register method of ProviderList.
-func TestRegister(t *testing.T) {
-	pl := CreateProviderList()
-	mockProvider := &MockProvider{name: "provider1"}
-
-	// Test registering a new provider
-	err := pl.Register(mockProvider)
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
+	// invalidProjectionSchema simulates a provider schema with an unsupported projection
+	var invalidProjectionSchema = schema{
+		Name:       "InvalidProjectionProvider",
+		ID:         "ip",
+		MaxJobs:    100,
+		MaxZoom:    19,
+		Projection: "unsupported_projection_type",
+		Request: reqSchema{
+			URL: "https://example.com/data",
+		},
 	}
 
-	// Test registering the same provider again
-	err = pl.Register(mockProvider)
-	if err == nil {
-		t.Error("Expected error when registering existing provider, got nil")
-	} else if err.Error() != "provider provider1 already exist" {
-		t.Errorf("Expected error 'provider provider1 already exist', got %v", err)
-	}
+	// Test unsupported projection
+	_, err = createProvider(&invalidProjectionSchema)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "projection")
 }
 
-// TestGet tests the Get method of ProviderList.
-func TestGet(t *testing.T) {
-	pl := CreateProviderList()
-	mockProvider := &MockProvider{key: "provider1"}
+// TestGetTile tests the GetTile method of MapProvider for various edge cases
+func TestGetTile(t *testing.T) {
+	provider, _ := createProvider(&MockProviderSchema)
 
-	// Register a provider
-	pl.Register(mockProvider)
+	// Test with valid inputs
+	lat, long, scale := 0.0, 0.0, 1.0 // Example coordinates and scale
+	testTile := provider.GetTile(lat, long, scale)
+	assert.NotNil(t, testTile)
+	assert.NotZero(t, testTile.X)
+	assert.NotZero(t, testTile.Y)
+	assert.NotZero(t, testTile.Z)
 
-	// Test getting an existing provider
-	provider, err := pl.Get("provider1")
-	if err != nil {
-		t.Errorf("Expected no error, got %v", err)
-	}
-	if provider == nil {
-		t.Error("Expected non-nil provider")
-	}
+	// Test with maximum zoom level
+	lat, long, scale = 0.0, 0.0, float64(MockProviderSchema.MaxZoom)
+	testTile = provider.GetTile(lat, long, scale)
+	assert.NotNil(t, testTile)
+	assert.NotZero(t, testTile.X)
+	assert.NotZero(t, testTile.Y)
 
-	// Test getting a non-existing provider
-	_, err = pl.Get("non_existing_provider")
-	if err == nil {
-		t.Error("Expected error when getting non-existing provider, got nil")
-	} else if err.Error() != "provider non_existing_provider not found" {
-		t.Errorf("Expected error 'provider non_existing_provider not found', got %v", err)
-	}
+	// Test with extremely high scale (to check for overflow or incorrect calculations)
+	lat, long, scale = 0.0, 0.0, float64(^uint(0)>>1) // Half of uint max value
+	testTile = provider.GetTile(lat, long, scale)
+	assert.NotNil(t, testTile)
+	assert.NotZero(t, testTile.X)
+	assert.NotZero(t, testTile.Y)
+	assert.NotZero(t, testTile.Z)
 }
 
-func TestGetAllNames(t *testing.T) {
-	// Create a new ProviderList
-	pl := CreateProviderList()
+func TestGetRequest(t *testing.T) {
+	provider, _ := createProvider(&MockProviderSchema)
 
-	// Register some mock providers
-	pl.Register(&MockProvider{key: "ProviderA"})
-	pl.Register(&MockProvider{key: "ProviderB"})
-	pl.Register(&MockProvider{key: "ProviderC"})
-
-	// Call GetAllKey
-	keys := pl.GetAllKey()
-
-	// Define the expected names
-	expectedKeys := []string{"ProviderA", "ProviderB", "ProviderC"}
-
-	// Check if the result matches the expected names
-	if len(keys) != len(expectedKeys) {
-		t.Errorf("Expected %d names, got %d", len(expectedKeys), len(keys))
-	}
-
-	nameMap := make(map[string]bool)
-	for _, name := range keys {
-		nameMap[name] = true
-	}
-
-	for _, expectedName := range expectedKeys {
-		if !nameMap[expectedName] {
-			t.Errorf("Expected name %s not found in result", expectedName)
-		}
-	}
+	// Test with valid tile coordinates
+	testTileValid := &tile.Tile{X: 123, Y: 456, Z: 7} // Example tile within valid range
+	req := provider.GetRequest(testTileValid)
+	assert.NotNil(t, req)
+	assert.Equal(t, "https://example.com/123/456/7.png", req.URL.String())
 }
 
-func TestGetAllNamesEmpty(t *testing.T) {
-	// Create a new ProviderList
-	pl := CreateProviderList()
-
-	// Call GetAllNames on an empty ProviderList
-	names := pl.GetAllKey()
-
-	// Check if the result is an empty slice
-	if len(names) != 0 {
-		t.Error("Expected GetAllNames to return an empty slice for an empty ProviderList")
+func TestGetRequestWithHeaders(t *testing.T) {
+	// MockProviderSchemaWithHeaders is assumed to be modified to include Headers
+	var MockProviderSchemaWithHeaders = schema{
+		Name:       "MockProvider",
+		ID:         "mp",
+		MaxJobs:    100,
+		MaxZoom:    19,
+		Projection: "wgs84",
+		Request: reqSchema{
+			URL: "https://example.com/{x}/{y}/{z}.png",
+			Headers: []headersSchema{
+				{"Authorization", "Bearer YOUR_TOKEN_HERE"},
+				{"Content-Type", "image/png"},
+			},
+		},
 	}
+	provider, _ := createProvider(&MockProviderSchemaWithHeaders)
+
+	// Test with valid tile coordinates
+	testTileValid := &tile.Tile{X: 123, Y: 456, Z: 7} // Example tile within valid range
+	req := provider.GetRequest(testTileValid)
+
+	assert.NotNil(t, req)
+	assert.Equal(t, req.Header.Get("Authorization"), MockProviderSchemaWithHeaders.Request.Headers[0].Value)
+	assert.Equal(t, req.Header.Get("Content-Type"), MockProviderSchemaWithHeaders.Request.Headers[1].Value)
+}
+
+func TestGetMaxZoom(t *testing.T) {
+	provider, _ := createProvider(&MockProviderSchema)
+
+	req := provider.MaxZoom()
+	assert.NotNil(t, req)
+	assert.Equal(t, MockProviderSchema.MaxZoom, req)
+}
+
+func TestGetMaxJobs(t *testing.T) {
+	provider, _ := createProvider(&MockProviderSchema)
+
+	req := provider.MaxJobs()
+	assert.NotNil(t, req)
+	assert.Equal(t, MockProviderSchema.MaxJobs, req)
 }

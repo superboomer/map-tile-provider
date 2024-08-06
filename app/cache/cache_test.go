@@ -1,115 +1,138 @@
-package cache_test
+package cache
 
 import (
-	"bytes"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/superboomer/map-tile-provider/app/cache"
+	"github.com/stretchr/testify/assert"
 	"github.com/superboomer/map-tile-provider/app/tile"
+	"go.etcd.io/bbolt"
 )
 
-func TestLoadCache(t *testing.T) {
-	// Setup test environment
-	tmpDir := os.TempDir()
-	cachePath := filepath.Join(tmpDir, "cache_test")
-	os.MkdirAll(cachePath, 0o600)
-	defer os.RemoveAll(cachePath) // Clean up after test
+func TestNewCache_Success(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test")
+	defer os.RemoveAll(tmpDir)
 
-	c, err := cache.LoadCache(cachePath, time.Hour*24)
-	if err != nil {
-		t.Errorf("LoadCache() error = %v", err)
-		return
-	}
-	if c == nil {
-		t.Error("Expected cache to be initialized, got nil")
-	}
+	cache, err := NewCache(tmpDir, time.Hour, nil)
+	assert.NoError(t, err)
+	assert.NotNil(t, cache)
 }
 
-func TestSaveTile(t *testing.T) {
-	// Setup test environment
-	tmpDir := os.TempDir()
-	cachePath := filepath.Join(tmpDir, "save_tile_test")
-	os.MkdirAll(cachePath, 0o600)
-	defer os.RemoveAll(cachePath) // Clean up after test
-
-	c, _ := cache.LoadCache(cachePath, time.Hour*24)
-
-	t.Run("valid tile save", func(t *testing.T) {
-		testTile := &tile.Tile{X: 1, Y: 2, Z: 3}
-		img := []byte("test image")
-		testTile.Image = img
-
-		err := c.SaveTile("vendor", testTile)
-		if err != nil {
-			t.Errorf("SaveTile() error = %v", err)
-			return
-		}
-
-		expectedImagePath := filepath.Join(cachePath, "vendor", fmt.Sprintf("%d", testTile.Z), fmt.Sprintf("%d_%d.jpeg", testTile.X, testTile.Y))
-		if _, errStat := os.Stat(expectedImagePath); os.IsNotExist(errStat) {
-			t.Errorf("Expected image file does not exist at path: %s", expectedImagePath)
-			return
-		}
-
-		actualImg, err := os.ReadFile(expectedImagePath)
-		if err != nil {
-			t.Errorf("Failed to read saved image file: %v", err)
-			return
-		}
-		if !bytes.Equal(actualImg, img) {
-			t.Errorf("Saved image does not match expected content")
-		}
-	})
-
-	t.Run("image not provided", func(t *testing.T) {
-		testTile := &tile.Tile{X: 1, Y: 2, Z: 3}
-		err := c.SaveTile("vendor", testTile)
-		if err == nil {
-			t.Error("Expected SaveTile() to return an error for missing image")
-		}
-	})
+func TestNewCache_FailedDir(t *testing.T) {
+	cache, err := NewCache("", time.Hour, nil)
+	assert.Error(t, err)
+	assert.Nil(t, cache)
 }
 
-func TestLoadFile(t *testing.T) {
-	// Setup test environment
-	tmpDir := os.TempDir()
-	cachePath := filepath.Join(tmpDir, "load_file_test")
-	os.MkdirAll(cachePath, 0o600)
-	defer os.RemoveAll(cachePath) // Clean up after test
+func TestNewCache_FailedIndex(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test")
+	defer os.RemoveAll(tmpDir)
 
-	c, _ := cache.LoadCache(cachePath, time.Hour*24)
+	cache, err := NewCache(tmpDir, time.Hour, nil)
+	assert.NoError(t, err)
+	assert.NotNil(t, cache)
 
-	t.Run("file exists", func(t *testing.T) {
-		testTile := &tile.Tile{X: 1, Y: 2, Z: 3}
-		img := []byte("test image")
-		testTile.Image = img
+	cache2, err := NewCache(tmpDir, time.Hour, &bbolt.Options{Timeout: time.Second})
+	assert.Error(t, err)
+	assert.Nil(t, cache2)
+}
 
-		// Save tile first
-		err := c.SaveTile("vendor", testTile)
-		if err != nil {
-			t.Errorf("SaveTile() error = %v", err)
-			return
-		}
+func TestSaveTile_Success(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save")
+	defer os.RemoveAll(tmpDir)
 
-		loadedImg, err := c.LoadFile("vendor", testTile)
-		if err != nil {
-			t.Errorf("LoadFile() error = %v", err)
-			return
-		}
-		if !bytes.Equal(loadedImg, img) {
-			t.Errorf("Loaded image does not match saved image")
-		}
-	})
+	cache, err := NewCache(tmpDir, time.Hour, nil)
+	assert.NoError(t, err)
 
-	t.Run("file does not exist", func(t *testing.T) {
-		testTile := &tile.Tile{X: 4, Y: 5, Z: 6}
-		_, err := c.LoadFile("vendor", testTile)
-		if err == nil {
-			t.Error("Expected LoadFile() to return an error for missing file")
-		}
-	})
+	testTile := &tile.Tile{X: 1, Y: 2, Z: 3, Image: []byte("test-image")}
+	err = cache.SaveTile("vendor", testTile)
+	assert.NoError(t, err)
+}
+
+func TestSaveTile_FailedReadOnly(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save")
+	defer os.RemoveAll(tmpDir)
+
+	createCacheFile, err := NewCache(tmpDir, time.Hour, nil)
+	assert.NoError(t, err)
+
+	assert.NoError(t, createCacheFile.Close())
+
+	cache, err := NewCache(tmpDir, time.Hour, &bbolt.Options{ReadOnly: true})
+	assert.NoError(t, err)
+
+	testTile := &tile.Tile{X: 1, Y: 2, Z: 3, Image: []byte("test-image")}
+	err = cache.SaveTile("vendor", testTile)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to update db:")
+}
+
+func TestLoadTile_Success(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
+	defer os.RemoveAll(tmpDir)
+
+	cache, err := NewCache(tmpDir, time.Hour, nil)
+	assert.NoError(t, err)
+
+	testTile := &tile.Tile{X: 1, Y: 2, Z: 3, Image: []byte("test-image")}
+	err = cache.SaveTile("vendor", testTile)
+	assert.NoError(t, err)
+
+	loadedTile, err := cache.LoadTile("vendor", &tile.Tile{X: 1, Y: 2, Z: 3})
+	assert.NoError(t, err)
+	assert.NotNil(t, loadedTile)
+}
+
+func TestLoadTile_FailedBucketError(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
+	defer os.RemoveAll(tmpDir)
+
+	cache, err := NewCache(tmpDir, time.Hour, nil)
+	assert.NoError(t, err)
+
+	loadedTile, err := cache.LoadTile("vendor", &tile.Tile{X: 1, Y: 2, Z: 3})
+	assert.Error(t, err)
+	assert.Nil(t, loadedTile)
+}
+
+func TestLoadTile_FailedTileError(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
+	defer os.RemoveAll(tmpDir)
+
+	cache, err := NewCache(tmpDir, time.Hour, nil)
+	assert.NoError(t, err)
+
+	testTile := &tile.Tile{X: 1, Y: 1, Z: 1, Image: []byte("test-image")}
+	err = cache.SaveTile("vendor", testTile)
+	assert.NoError(t, err)
+
+	loadedTile, err := cache.LoadTile("vendor", &tile.Tile{X: 2, Y: 2, Z: 2})
+	assert.Error(t, err)
+	assert.Nil(t, loadedTile)
+}
+
+func TestSaveImage_Success(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save-image")
+	defer os.RemoveAll(tmpDir)
+
+	cache, err := NewCache(tmpDir, time.Hour, nil)
+	assert.NoError(t, err)
+
+	testTile := &tile.Tile{X: 1, Y: 2, Z: 3, Image: []byte("test-image")}
+	err = cache.saveImage("vendor", testTile)
+	assert.NoError(t, err)
+
+	imagePath := filepath.Join(tmpDir, "vendor", "3", "1_2.jpeg")
+	_, err = os.Stat(imagePath)
+	assert.NoError(t, err)
+}
+
+func TestUnixTimeEncodeDecode(t *testing.T) {
+	now := time.Now()
+	encoded := unixTimeEncode(now)
+	decoded := unixTimeDecode(encoded)
+
+	assert.Equal(t, now.Unix(), decoded.Unix())
 }

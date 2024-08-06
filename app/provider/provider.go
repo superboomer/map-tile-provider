@@ -3,15 +3,18 @@ package provider
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/superboomer/map-tile-provider/app/tile"
 )
+
+//go:generate moq -out provider_mock.go -fmt goimports . Provider
 
 // Provider is an interface which implement all necessary stuff for map provider
 type Provider interface {
 	GetTile(lat, long, scale float64) tile.Tile
 
-	Key() string
+	ID() string
 	Name() string
 	MaxJobs() int
 	MaxZoom() int
@@ -19,47 +22,88 @@ type Provider interface {
 	GetRequest(t *tile.Tile) *http.Request
 }
 
-// ListInterface is a provider list
-type ListInterface interface {
-	GetAllKey() []string
-	Get(key string) (Provider, error)
+// MapProvider contains all data about provider
+type MapProvider struct {
+	name       string
+	id         string
+	url        string
+	headers    *http.Header
+	maxJobs    int
+	maxZoom    int
+	projection *tile.Elips
 }
 
-// List is a map with all registered providers
-type List map[string]Provider
+// createProvider create new provider by specified Schema
+func createProvider(schema *schema) (Provider, error) {
 
-// CreateProviderList create empty ProviderList
-func CreateProviderList() *List {
-	pl := make(List)
-	return &pl
-}
-
-// Register new Provider in ProviderList
-func (pl List) Register(p Provider) error {
-	_, err := pl.Get(p.Key())
-	if err == nil {
-		return fmt.Errorf("provider %s already exist", p.Name())
+	p := &MapProvider{
+		name:    schema.Name,
+		id:      schema.ID,
+		url:     schema.Request.URL,
+		maxJobs: schema.MaxJobs,
+		maxZoom: schema.MaxZoom,
+	}
+	switch schema.Projection {
+	case "wgs84":
+		p.projection = &tile.ElipsWGS84
+	case "spherical":
+		p.projection = &tile.ElipsSpherical
+	default:
+		return nil, fmt.Errorf("projection %v not found for provider %v", schema.Projection, schema.Name)
 	}
 
-	pl[p.Key()] = p
+	buildHeaders := &http.Header{}
 
-	return nil
+	for _, h := range schema.Request.Headers {
+		buildHeaders.Set(h.Key, h.Value)
+	}
+
+	p.headers = buildHeaders
+
+	return p, nil
 }
 
-// Get return specified by name provider
-func (pl List) Get(key string) (Provider, error) {
-	provider, exists := pl[key]
-	if !exists {
-		return nil, fmt.Errorf("provider %s not found", key)
+// GetTile calculate tile XYZ
+func (p *MapProvider) GetTile(lat, long, scale float64) tile.Tile {
+
+	tileX, tileY := tile.ConvertToTile(lat, long, scale, p.projection)
+
+	return tile.Tile{
+		X: tileX,
+		Y: tileY,
+		Z: int(scale),
 	}
-	return provider, nil
 }
 
-// GetAllKey return all regisitered providers name
-func (pl List) GetAllKey() []string {
-	keys := make([]string, 0, len(pl))
-	for key := range pl {
-		keys = append(keys, key)
+// MaxJobs return count of max tile downloading per request
+func (p *MapProvider) MaxJobs() int {
+	return p.maxJobs
+}
+
+// MaxZoom return max zoom for specified provider
+func (p *MapProvider) MaxZoom() int {
+	return p.maxZoom
+}
+
+// Name return provider name
+func (p *MapProvider) Name() string {
+	return p.name
+}
+
+// ID return provider ID
+func (p *MapProvider) ID() string {
+	return p.id
+}
+
+// GetRequest build http request for specified Tile
+func (p *MapProvider) GetRequest(t *tile.Tile) *http.Request {
+
+	replacer := strings.NewReplacer("{x}", fmt.Sprint(t.X), "{y}", fmt.Sprint(t.Y), "{z}", fmt.Sprint(t.Z))
+	req, _ := http.NewRequest(http.MethodGet, replacer.Replace(p.url), http.NoBody)
+
+	if p.headers != nil {
+		req.Header = *p.headers
 	}
-	return keys
+
+	return req
 }

@@ -13,7 +13,7 @@ import (
 func (s *Server) SetRoutes(a *api.API, md *middleware.MD) {
 	h := http.NewServeMux()
 
-	h.HandleFunc("/map", md.GlobalRateLimiter(a.Map).ServeHTTP)
+	h.HandleFunc("/map", a.Map)
 	h.HandleFunc("/healthcheck", a.HealthCheck)
 	h.HandleFunc("/provider", a.Provider)
 
