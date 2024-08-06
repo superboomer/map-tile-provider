@@ -10,7 +10,7 @@ import (
 	"github.com/superboomer/map-tile-provider/app/tile"
 )
 
-func TestNewCache(t *testing.T) {
+func TestNewCache_Success(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test")
 	defer os.RemoveAll(tmpDir)
 
@@ -19,7 +19,13 @@ func TestNewCache(t *testing.T) {
 	assert.NotNil(t, cache)
 }
 
-func TestSaveTile(t *testing.T) {
+func TestNewCache_FailedDir(t *testing.T) {
+	cache, err := NewCache("", time.Hour)
+	assert.Error(t, err)
+	assert.Nil(t, cache)
+}
+
+func TestSaveTile_Success(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save")
 	defer os.RemoveAll(tmpDir)
 
@@ -31,7 +37,7 @@ func TestSaveTile(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestLoadTile(t *testing.T) {
+func TestLoadTile_Success(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
 	defer os.RemoveAll(tmpDir)
 
@@ -47,7 +53,35 @@ func TestLoadTile(t *testing.T) {
 	assert.NotNil(t, loadedTile)
 }
 
-func TestSaveImage(t *testing.T) {
+func TestLoadTile_FailedBucketError(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
+	defer os.RemoveAll(tmpDir)
+
+	cache, err := NewCache(tmpDir, time.Hour)
+	assert.NoError(t, err)
+
+	loadedTile, err := cache.LoadTile("vendor", &tile.Tile{X: 1, Y: 2, Z: 3})
+	assert.Error(t, err)
+	assert.Nil(t, loadedTile)
+}
+
+func TestLoadTile_FailedTileError(t *testing.T) {
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
+	defer os.RemoveAll(tmpDir)
+
+	cache, err := NewCache(tmpDir, time.Hour)
+	assert.NoError(t, err)
+
+	testTile := &tile.Tile{X: 1, Y: 1, Z: 1, Image: []byte("test-image")}
+	err = cache.SaveTile("vendor", testTile)
+	assert.NoError(t, err)
+
+	loadedTile, err := cache.LoadTile("vendor", &tile.Tile{X: 2, Y: 2, Z: 2})
+	assert.Error(t, err)
+	assert.Nil(t, loadedTile)
+}
+
+func TestSaveImage_Success(t *testing.T) {
 	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save-image")
 	defer os.RemoveAll(tmpDir)
 

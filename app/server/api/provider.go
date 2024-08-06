@@ -42,9 +42,5 @@ func (a *API) Provider(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-
-	_, err = w.Write(results)
-	if err != nil {
-		a.Logger.Error("error on provider handler", zap.Error(err), zap.String("req_id", req.Header.Get("X-Request-ID")))
-	}
+	_, _ = w.Write(results)
 }

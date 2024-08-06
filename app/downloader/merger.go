@@ -82,12 +82,7 @@ func createMergedImage(side int, centerTile tile.Tile, coordsData *imageTileSlic
 		}
 	}
 
-	resultImage, err := mergeImagesIntoResult(images, side)
-	if err != nil {
-		return nil, fmt.Errorf("error occurred with encoding new image: %w", err)
-	}
-
-	return resultImage, nil
+	return mergeImagesIntoResult(images, side)
 }
 
 // prepareImageGrid initializes a grid to hold images based on the side length.

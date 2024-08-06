@@ -75,16 +75,13 @@ func (a *API) Map(w http.ResponseWriter, req *http.Request) {
 		})
 
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write(results)
 		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write(results)
 		return
 	}
 
 	w.Header().Set("Content-Type", "image/jpeg")
-	_, err = w.Write(merged)
-	if err != nil {
-		a.Logger.Error("error on merging image", zap.Error(err), zap.String("req_id", req.Header.Get("X-Request-ID")))
-	}
+	_, _ = w.Write(merged)
 
 	a.Logger.Info("new map download request", zap.Float64("lat", params.Latitude), zap.Float64("long", params.Longitude), zap.Int("side", params.Side), zap.String("vendor", vendor.Name()), zap.String("req_id", req.Header.Get("X-Request-ID")))
 }
@@ -159,13 +156,14 @@ func (a *API) parseRequest(req *http.Request) (*mapParams, provider.Provider, er
 
 func parseFloatParam(param string) (float64, error) {
 	valueStr := strings.TrimSpace(param)
-	valueFloat, err := strconv.ParseFloat(valueStr, 64)
-	if err != nil {
-		return 0, err
-	}
 
 	if valueStr == "" {
 		return 0, fmt.Errorf("not specified")
+	}
+
+	valueFloat, err := strconv.ParseFloat(valueStr, 64)
+	if err != nil {
+		return 0, err
 	}
 
 	return valueFloat, nil
