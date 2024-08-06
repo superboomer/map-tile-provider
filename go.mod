@@ -3,7 +3,7 @@ module github.com/superboomer/map-tile-provider
 go 1.22
 
 require (
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.3
 	github.com/umputun/go-flags v1.5.1
