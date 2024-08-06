@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"image/jpeg"
+	"net/http"
 	"testing"
 
 	"github.com/superboomer/map-tile-provider/app/tile"
@@ -39,7 +40,9 @@ func TestMerge(t *testing.T) {
 		{X: 1, Y: 2, Image: createTestImage(color.RGBA{128, 128, 128, 255})}, // Gray
 	}
 
-	resultBytes, err := Merge(side, centerTile, tiles...)
+	downloader := NewMapDownloader(http.DefaultClient)
+
+	resultBytes, err := downloader.Merge(side, centerTile, tiles...)
 	if err != nil {
 		t.Fatalf("Merge failed: %v", err)
 	}
@@ -65,7 +68,9 @@ func TestMerge_ErrorDecoding(t *testing.T) {
 		{X: 1, Y: 1, Image: []byte{0x00}}, // Invalid image data
 	}
 
-	resultBytes, err := Merge(side, centerTile, tiles...)
+	downloader := NewMapDownloader(http.DefaultClient)
+
+	resultBytes, err := downloader.Merge(side, centerTile, tiles...)
 	if err == nil {
 		t.Fatal("Expected an error but got none")
 	}
@@ -82,7 +87,9 @@ func TestMerge_ErrorEncoding(t *testing.T) {
 		{X: 0, Y: 0, Image: createTestImage(color.RGBA{255, 0, 0, 255})},
 	}
 
-	resultBytes, err := Merge(side, centerTile, tiles...)
+	downloader := NewMapDownloader(http.DefaultClient)
+
+	resultBytes, err := downloader.Merge(side, centerTile, tiles...)
 	if err == nil {
 		t.Fatal("Expected an error but got none")
 	}

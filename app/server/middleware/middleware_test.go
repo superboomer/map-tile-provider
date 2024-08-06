@@ -1,4 +1,4 @@
-package middleware_test
+package middleware
 
 import (
 	"net/http"
@@ -8,11 +8,10 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/superboomer/map-tile-provider/app/server/middleware"
 )
 
 func TestMiddleware_Log(t *testing.T) {
-	md := &middleware.MD{
+	md := &MD{
 		Logger: zap.NewNop(),
 	}
 
@@ -29,7 +28,7 @@ func TestMiddleware_Log(t *testing.T) {
 }
 
 func TestMiddleware_RequestID(t *testing.T) {
-	md := &middleware.MD{
+	md := &MD{
 		Logger: zap.NewNop(),
 	}
 

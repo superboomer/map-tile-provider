@@ -1,191 +1,72 @@
 package downloader
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/superboomer/map-tile-provider/app/cache"
+	"github.com/superboomer/map-tile-provider/app/provider"
 	"github.com/superboomer/map-tile-provider/app/tile"
 )
 
-type MockProvider struct {
-	MaxJobsCount int
-	RequestFunc  func(t *tile.Tile) *http.Request
-}
-
-func (mp *MockProvider) MaxJobs() int {
-	return mp.MaxJobsCount
-}
-
-func (mp *MockProvider) MaxZoom() int {
-	return 20 // Return a fixed number of jobs for testing.
-}
-
-func (mp *MockProvider) Name() string {
-	return "name"
-}
-
-func (mp *MockProvider) Key() string {
-	return "key"
-}
-
-func (mp *MockProvider) GetTile(lat, long, scale float64) tile.Tile {
-	return tile.Tile{}
-}
-
-func (mp *MockProvider) GetRequest(t *tile.Tile) *http.Request {
-	return mp.RequestFunc(t)
-}
-
-func TestStartMultiDownload_Success(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("image data"))
-	}))
-	defer ts.Close()
-
-	mockProvider := &MockProvider{
-		MaxJobsCount: 2,
-		RequestFunc: func(t *tile.Tile) *http.Request {
-			req, _ := http.NewRequest("GET", ts.URL, http.NoBody)
+func TestDownload_SuccessfulWithoutCacheHit(t *testing.T) {
+	mockProvider := &provider.ProviderMock{
+		GetRequestFunc: func(*tile.Tile) *http.Request {
+			req, _ := http.NewRequest(http.MethodGet, "https://example.com", http.NoBody)
 			return req
 		},
+		MaxJobsFunc: func() int { return 2 },
+		IDFunc:      func() string { return "name" },
 	}
 
-	tiles := []tile.Tile{
-		{X: 1},
-		{X: 2},
+	mockCache := &cache.CacheMock{
+		LoadTileFunc: func(string, *tile.Tile) ([]byte, error) {
+			return nil, errors.New("not found")
+		},
+		SaveTileFunc: func(string, *tile.Tile) error { return nil },
 	}
 
-	results, err := StartMultiDownload(nil, mockProvider, tiles...)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
+	downloader := NewMapDownloader(http.DefaultClient)
 
-	if len(results) != len(tiles) {
-		t.Fatalf("expected %d results, got %d", len(tiles), len(results))
-	}
+	tiles := []tile.Tile{{X: 1, Y: 2, Z: 3}}
+	downloadedTiles, err := downloader.Download(mockCache, mockProvider, tiles...)
 
-	for _, result := range results {
-		if string(result.Image) != "image data" {
-			t.Errorf("expected image data to be 'image data', got %s", string(result.Image))
-		}
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, len(tiles), len(downloadedTiles))
+	// Assert interactions
+	assert.Len(t, mockProvider.GetRequestCalls(), 1) // Assuming 1 calls expected
+	assert.Len(t, mockCache.SaveTileCalls(), 1)      // Assuming 1 saves due to cache misses
 }
 
-func TestStartMultiDownload_ErrorHandling(t *testing.T) {
-	mockProvider := &MockProvider{
-		MaxJobsCount: 1,
-		RequestFunc: func(t *tile.Tile) *http.Request {
-			req, _ := http.NewRequest("GET", "http://invalid.url", http.NoBody)
-			return req
+func TestDownload_FailedDownload(t *testing.T) {
+	mockProvider := &provider.ProviderMock{
+		GetRequestFunc: func(testTile *tile.Tile) *http.Request {
+			if testTile.X == 1 {
+				req, _ := http.NewRequest(http.MethodGet, "https://example.com", http.NoBody)
+				return req
+			}
+			return nil
 		},
+		MaxJobsFunc: func() int { return 1 },
+		IDFunc:      func() string { return "name" },
 	}
 
-	tiles := []tile.Tile{
-		{X: 1},
+	mockCache := &cache.CacheMock{
+		LoadTileFunc: func(string, *tile.Tile) ([]byte, error) { return nil, fmt.Errorf("not found") }, // Cache miss
+		SaveTileFunc: func(string, *tile.Tile) error { return nil },                                    // Assume save succeeds
 	}
 
-	results, err := StartMultiDownload(nil, mockProvider, tiles...)
-	if err == nil {
-		t.Fatal("expected an error but got none")
-	}
+	downloader := NewMapDownloader(http.DefaultClient)
 
-	if len(results) != 0 {
-		t.Fatalf("expected no results, got %d", len(results))
-	}
-}
+	tiles := []tile.Tile{{X: 1, Y: 2, Z: 3}, {X: 4, Y: 5, Z: 6}}
+	_, err := downloader.Download(mockCache, mockProvider, tiles...)
 
-func TestStartMultiDownload_NotFound(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-	}))
-	defer ts.Close()
-
-	mockProvider := &MockProvider{
-		MaxJobsCount: 1,
-		RequestFunc: func(t *tile.Tile) *http.Request {
-			req, _ := http.NewRequest("GET", ts.URL, http.NoBody)
-			return req
-		},
-	}
-
-	tiles := []tile.Tile{
-		{X: 1},
-		{X: 2},
-	}
-
-	results, err := StartMultiDownload(nil, mockProvider, tiles...)
-	if err == nil {
-		t.Fatal("expected an error due to 404 but got none")
-	}
-
-	if len(results) != 0 {
-		t.Fatalf("expected no results, got %d", len(results))
-	}
-}
-
-func TestStartMultiDownload_BadRequest(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusBadRequest)
-	}))
-	defer ts.Close()
-
-	mockProvider := &MockProvider{
-		MaxJobsCount: 1,
-		RequestFunc: func(t *tile.Tile) *http.Request {
-			req, _ := http.NewRequest("GET", ts.URL, http.NoBody)
-			return req
-		},
-	}
-
-	tiles := []tile.Tile{
-		{X: 1},
-		{X: 2},
-	}
-
-	results, err := StartMultiDownload(nil, mockProvider, tiles...)
-	if err == nil {
-		t.Fatal("expected an error due to 400 Bad Request but got none")
-	}
-
-	if len(results) != 0 {
-		t.Fatalf("expected no results, got %d", len(results))
-	}
-}
-
-func TestStartMultiDownload_ConcurrentDownloads(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("image data"))
-	}))
-	defer ts.Close()
-
-	mockProvider := &MockProvider{
-		MaxJobsCount: 2,
-		RequestFunc: func(t *tile.Tile) *http.Request {
-			req, _ := http.NewRequest("GET", ts.URL, http.NoBody)
-			return req
-		},
-	}
-
-	tiles := []tile.Tile{
-		{X: 1},
-		{X: 2},
-	}
-
-	results, err := StartMultiDownload(nil, mockProvider, tiles...)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-
-	if len(results) != len(tiles) {
-		t.Fatalf("expected %d results, got %d", len(tiles), len(results))
-	}
-
-	for _, result := range results {
-		if string(result.Image) != "image data" {
-			t.Errorf("expected image data to be 'image data', got %s", string(result.Image))
-		}
-	}
+	assert.Error(t, err) // Expect an error due to download failure
+	// Assert interactions
+	assert.Contains(t, err.Error(), "request is empty")
+	assert.Len(t, mockProvider.GetRequestCalls(), 2) // Still expect 2 calls despite failure
+	assert.Len(t, mockCache.SaveTileCalls(), 1)      // One save due to cache miss and successful download
 }

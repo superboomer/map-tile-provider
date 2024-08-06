@@ -7,8 +7,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// HealthCheckModel contains data about health check
-type HealthCheckModel struct {
+// healthCheckModel contains data about health check
+type healthCheckModel struct {
 	Status int    `json:"status"`
 	Body   string `json:"body"`
 }
@@ -18,12 +18,12 @@ type HealthCheckModel struct {
 // @Description just return HealthCheckModel with API status (always return 200)
 // @Accept  json
 // @Produce  application/json
-// @Success		200	{object}	HealthCheckModel
+// @Success		200	{object}	healthCheckModel
 // @Header 200 {string} X-Request-Id "request_id"
 // @Router /healthcheck [get]
 func (a *API) HealthCheck(w http.ResponseWriter, req *http.Request) {
 
-	var res = HealthCheckModel{
+	var res = healthCheckModel{
 		Status: 200,
 		Body:   "OK",
 	}

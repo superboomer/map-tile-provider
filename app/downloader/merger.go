@@ -13,17 +13,14 @@ import (
 
 type imageTileSlice []tile.Tile
 
-// Len is part of sort.Interface.
 func (d imageTileSlice) Len() int {
 	return len(d)
 }
 
-// Swap is part of sort.Interface
 func (d imageTileSlice) Swap(i, j int) {
 	d[i], d[j] = d[j], d[i]
 }
 
-// Less compare two value and return less
 func (d imageTileSlice) Less(i, j int) bool {
 	if d[i].Y == d[j].Y {
 		return d[i].X < d[j].X
@@ -31,48 +28,79 @@ func (d imageTileSlice) Less(i, j int) bool {
 	return d[i].Y < d[j].Y
 }
 
-// Merge combines multiple tiles into a single image
-func Merge(side int, centerTile tile.Tile, tiles ...tile.Tile) ([]byte, error) {
-	var coordsData = make(imageTileSlice, 0)
+// Merge combines multiple tiles into a single image.
+func (m *MapDownloader) Merge(side int, centerTile tile.Tile, tiles ...tile.Tile) ([]byte, error) {
+	coordsData := filterAndSortTiles(tiles, centerTile)
+	if coordsData == nil {
+		return nil, fmt.Errorf("center tile is not exist in tiles, x=%d, y=%d, z=%d", centerTile.X, centerTile.Y, centerTile.Z)
+	}
 
-	var centerTileOK bool
+	mergedImage, err := createMergedImage(side, centerTile, coordsData)
+	if err != nil {
+		return nil, fmt.Errorf("error occurred during image merging: %w", err)
+	}
+
+	return mergedImage.Bytes(), nil
+}
+
+// filterAndSortTiles filters out tiles to ensure the center tile exists and sorts them.
+func filterAndSortTiles(tiles []tile.Tile, centerTile tile.Tile) *imageTileSlice {
+	var coordsData = make(imageTileSlice, 0)
+	centerTileOK := false
 
 	for _, t := range tiles {
 		if t.Image == nil {
-			return nil, fmt.Errorf("image empty on tile x=%d, y=%d, z=%d", t.X, t.Y, t.Z)
+			return nil // Early return if any tile has no image data
 		}
 		if t.X == centerTile.X && t.Y == centerTile.Y && t.Z == centerTile.Z {
 			centerTileOK = true
 		}
-
 		coordsData = append(coordsData, t)
 	}
 
 	if !centerTileOK {
-		return nil, fmt.Errorf("center tile is not exist in tiles, x=%d, y=%d, z=%d", centerTile.X, centerTile.Y, centerTile.Z)
+		return nil // Center tile not found among provided tiles
 	}
 
 	sort.Sort(coordsData)
+	return &coordsData
+}
 
-	images := make([][]image.Image, side)
-	for i := range images {
-		images[i] = make([]image.Image, side)
-	}
-
-	for _, file := range coordsData {
+// createMergedImage creates a merged image from sorted tiles around a center tile.
+func createMergedImage(side int, centerTile tile.Tile, coordsData *imageTileSlice) (*bytes.Buffer, error) {
+	images := prepareImageGrid(side)
+	for _, file := range *coordsData {
 		img, _, err := image.Decode(bytes.NewReader(file.Image))
 		if err != nil {
-			return nil, fmt.Errorf("error occurred with decoding image err=%w", err)
+			return nil, fmt.Errorf("error occurred with decoding image: %w", err)
 		}
 
 		x := file.X - centerTile.X + (side / 2)
 		y := file.Y - centerTile.Y + (side / 2)
-
 		if x >= 0 && x < side && y >= 0 && y < side {
 			images[x][y] = img
 		}
 	}
 
+	resultImage, err := mergeImagesIntoResult(images, side)
+	if err != nil {
+		return nil, fmt.Errorf("error occurred with encoding new image: %w", err)
+	}
+
+	return resultImage, nil
+}
+
+// prepareImageGrid initializes a grid to hold images based on the side length.
+func prepareImageGrid(side int) [][]image.Image {
+	images := make([][]image.Image, side)
+	for i := range images {
+		images[i] = make([]image.Image, side)
+	}
+	return images
+}
+
+// mergeImagesIntoResult merges individual tile images into a single image.
+func mergeImagesIntoResult(images [][]image.Image, side int) (*bytes.Buffer, error) {
 	totalWidth := images[0][0].Bounds().Dx() * side
 	totalHeight := images[0][0].Bounds().Dy() * side
 	result := image.NewRGBA(image.Rect(0, 0, totalWidth, totalHeight))
@@ -95,8 +123,8 @@ func Merge(side int, centerTile tile.Tile, tiles ...tile.Tile) ([]byte, error) {
 	resultImage := bytes.NewBuffer([]byte{})
 	err := jpeg.Encode(resultImage, result, &jpeg.Options{Quality: 100})
 	if err != nil {
-		return nil, fmt.Errorf("error occurred with encoding new image err=%w", err)
+		return nil, fmt.Errorf("error occurred with encoding new image: %w", err)
 	}
 
-	return resultImage.Bytes(), nil
+	return resultImage, nil
 }

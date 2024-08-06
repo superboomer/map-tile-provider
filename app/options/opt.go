@@ -6,6 +6,8 @@ type Opts struct {
 	Log     Log    `group:"log" namespace:"log" env-namespace:"LOG"`
 	APIPort string `long:"api-port" env:"API_PORT" default:"8080" description:"what port listen"`
 	Swagger bool   `long:"swagger" env:"SWAGGER" description:"host swagger docs"`
+	Schema  string `long:"SCHEMA" env:"SCHEMA" description:"providers specs"`
+	MaxSide int    `long:"MAX_SIDE" env:"MAX_SIDE" default:"10" description:"max square side"`
 }
 
 // Cache represent struct for Cache options

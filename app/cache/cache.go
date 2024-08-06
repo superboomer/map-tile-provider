@@ -5,112 +5,130 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
+	"go.etcd.io/bbolt"
+
 	"github.com/superboomer/map-tile-provider/app/tile"
-	bolt "go.etcd.io/bbolt"
 )
 
-// Cache contains all necessary stuff for cache
-type Cache struct {
-	db    *bolt.DB
+//go:generate moq -out cache_mock.go . Cache
+
+// Cache describe basic cache for tiles
+type Cache interface {
+	SaveTile(vendor string, t *tile.Tile) error
+	LoadTile(vendor string, t *tile.Tile) ([]byte, error)
+}
+
+// MapCache manages cached tiles with both in-memory and persistent storage
+type MapCache struct {
+	db    *bbolt.DB
 	path  string
 	alive time.Duration
+	mutex sync.RWMutex
 }
 
-func unixTimeEncode(t time.Time) []byte {
-	buf := make([]byte, 8)
-	u := uint64(t.Unix())
-	binary.BigEndian.PutUint64(buf, u)
-	return buf
-}
-
-func unixTimeDecode(b []byte) time.Time {
-	i := int64(binary.BigEndian.Uint64(b))
-	return time.Unix(i, 0)
-}
-
-// LoadCache create Cache struct
-func LoadCache(path string, alive time.Duration) (*Cache, error) {
-	err := os.MkdirAll(path, 0o600)
+// NewCache initializes a new Cache instance
+func NewCache(path string, alive time.Duration) (*MapCache, error) {
+	err := os.MkdirAll(path, 0o700)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create cache directory: %w", err)
 	}
 
-	db, err := bolt.Open(filepath.Join(path, "index.db"), 0o600, nil)
+	dbPath := filepath.Join(path, "index.db")
+	db, err := bbolt.Open(dbPath, 0o600, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open bolt db: %w", err)
 	}
 
-	return &Cache{db: db, path: path, alive: alive}, nil
+	return &MapCache{db: db, path: path, alive: alive, mutex: sync.RWMutex{}}, nil
 }
 
-// LoadFile load tile image from cache
-func (c *Cache) LoadFile(vendor string, t *tile.Tile) ([]byte, error) {
-	err := c.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(vendor))
+// SaveTile saves a tile to both BoltDB and disk storage
+func (c *MapCache) SaveTile(vendor string, t *tile.Tile) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 
-		if b == nil {
-			return fmt.Errorf("cache is invalid")
+	err := c.db.Update(func(tx *bbolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte(vendor))
+		if err != nil {
+			return err
 		}
 
-		v := b.Get([]byte(fmt.Sprintf("%d_%d_%d", t.X, t.Y, t.Z)))
-		if v == nil {
-			return fmt.Errorf("cache is invalid")
-		}
-
-		if !time.Now().Before(unixTimeDecode(v).Add(c.alive)) {
-			return fmt.Errorf("cache is invalid")
-		}
-
-		return nil
+		key := []byte(fmt.Sprintf("%d_%d_%d", t.X, t.Y, t.Z))
+		value := unixTimeEncode(time.Now())
+		return bucket.Put(key, value)
 	})
 
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("failed to update db: %w", err)
 	}
 
-	img, err := os.ReadFile(filepath.Clean(filepath.Join(c.path, vendor, fmt.Sprintf("%d", t.Z), fmt.Sprintf("%d_%d.jpeg", t.X, t.Y))))
+	return c.saveImage(vendor, t)
+}
+
+// LoadTile attempts to load a tile from cache, checking both BoltDB and disk storage
+func (c *MapCache) LoadTile(vendor string, t *tile.Tile) ([]byte, error) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	var img []byte
+	var err error
+
+	err = c.db.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(vendor))
+		if bucket == nil {
+			return fmt.Errorf("bucket not found")
+		}
+
+		key := []byte(fmt.Sprintf("%d_%d_%d", t.X, t.Y, t.Z))
+		value := bucket.Get(key)
+		if value == nil || !time.Now().Before(unixTimeDecode(value).Add(c.alive)) {
+			return fmt.Errorf("tile not found or expired")
+		}
+
+		img, err = os.ReadFile(filepath.Clean(filepath.Join(c.path, vendor, fmt.Sprintf("%d", t.Z), fmt.Sprintf("%d_%d.jpeg", t.X, t.Y))))
+		return err
+	})
 	if err != nil {
-		return nil, fmt.Errorf("can't read image from cache: %w", err)
+		return nil, fmt.Errorf("failed to load tile: %w", err)
 	}
 
 	return img, nil
 }
 
-// SaveTile save tile to boldDB and write image on disk
-func (c *Cache) SaveTile(vendor string, t *tile.Tile) error {
-	if t.Image == nil {
-		return fmt.Errorf("image not provided")
-	}
+// saveImage saves an image file to disk
+func (c *MapCache) saveImage(vendor string, t *tile.Tile) error {
+	dirPath := filepath.Join(c.path, vendor, fmt.Sprintf("%d", t.Z))
+	filePath := filepath.Join(dirPath, fmt.Sprintf("%d_%d.jpeg", t.X, t.Y))
 
-	return c.db.Update(func(tx *bolt.Tx) error {
-		err := c.saveImage(vendor, t)
-		if err != nil {
-			return err
-		}
-
-		b, err := tx.CreateBucketIfNotExists([]byte(vendor))
-		if err != nil {
-			return err
-		}
-		return b.Put([]byte(fmt.Sprintf("%d_%d_%d", t.X, t.Y, t.Z)), unixTimeEncode(time.Now()))
-	})
-}
-
-// saveImage create cache folder if need and save image on disk
-func (c *Cache) saveImage(vendor string, t *tile.Tile) error {
-	err := os.MkdirAll(filepath.Join(c.path, vendor, fmt.Sprintf("%d", t.Z)), 0o600)
+	err := os.MkdirAll(dirPath, 0o700)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	file, err := os.Create(filepath.Clean(filepath.Join(c.path, vendor, fmt.Sprintf("%d", t.Z), fmt.Sprintf("%d_%d.jpeg", t.X, t.Y))))
+	file, err := os.Create(filepath.Clean(filePath))
 	if err != nil {
-		return fmt.Errorf("unable to create file: %w", err)
+		return fmt.Errorf("failed to create file: %w", err)
 	}
-	defer file.Close()
 
 	_, err = file.Write(t.Image)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to write image: %w", err)
+	}
+
+	return nil
+}
+
+// unixTimeEncode encodes time.Time to []byte
+func unixTimeEncode(t time.Time) []byte {
+	buf := make([]byte, 8)
+	binary.BigEndian.PutUint64(buf, uint64(t.Unix()))
+	return buf
+}
+
+// unixTimeDecode decodes []byte to time.Time
+func unixTimeDecode(b []byte) time.Time {
+	return time.Unix(int64(binary.BigEndian.Uint64(b)), 0)
 }

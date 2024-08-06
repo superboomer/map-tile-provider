@@ -1,4 +1,4 @@
-package server_test
+package server
 
 import (
 	"context"
@@ -7,13 +7,12 @@ import (
 	"time"
 
 	"github.com/superboomer/map-tile-provider/app/options"
-	"github.com/superboomer/map-tile-provider/app/server"
 	"go.uber.org/zap"
 )
 
 // Test RunHTTP
 func TestRunHTTP(t *testing.T) {
-	s := server.NewServer(&options.Opts{APIPort: "8080"}, zap.NewNop())
+	s := NewServer(&options.Opts{APIPort: "8080"}, zap.NewNop())
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -41,7 +40,7 @@ func TestRun(t *testing.T) {
 		cancel()                           // Cancel the context to trigger shutdown
 	}()
 
-	err := server.Run(ctx, logger, opts)
+	err := Run(ctx, logger, opts)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}

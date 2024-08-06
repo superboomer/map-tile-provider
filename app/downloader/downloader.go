@@ -10,19 +10,37 @@ import (
 	"github.com/superboomer/map-tile-provider/app/tile"
 )
 
+//go:generate moq -out downloader_mock.go  -fmt goimports . Downloader
+
+// Downloader implements basic downloader interface
+type Downloader interface {
+	Download(c cache.Cache, l provider.Provider, tiles ...tile.Tile) ([]tile.Tile, error)
+	Merge(side int, centerTile tile.Tile, tiles ...tile.Tile) ([]byte, error)
+}
+
+// MapDownloader implements interface Downloader
+type MapDownloader struct {
+	client *http.Client
+}
+
+// NewMapDownloader create new MapDownloader with specified httpClient
+func NewMapDownloader(client *http.Client) *MapDownloader {
+	return &MapDownloader{client: client}
+}
+
 type downloadQuery struct {
 	Tile    tile.Tile
 	Request *http.Request
 	Error   error
 }
 
-// StartMultiDownload orchestrates the concurrent downloading of multiple tiles using a specified provider
-func StartMultiDownload(c *cache.Cache, l provider.Provider, tiles ...tile.Tile) ([]tile.Tile, error) {
+// Download orchestrates the concurrent downloading of multiple tiles using a specified provider
+func (m *MapDownloader) Download(c cache.Cache, l provider.Provider, tiles ...tile.Tile) ([]tile.Tile, error) {
 	jobs := make(chan downloadQuery, l.MaxJobs())
 	results := make(chan downloadQuery, len(tiles))
 
 	for w := 1; w <= l.MaxJobs(); w++ {
-		go worker(c, l.Name(), jobs, results)
+		go m.worker(c, l.ID(), jobs, results)
 	}
 
 	for _, p := range tiles {
@@ -47,10 +65,10 @@ func StartMultiDownload(c *cache.Cache, l provider.Provider, tiles ...tile.Tile)
 }
 
 // worker download image
-func worker(c *cache.Cache, vendor string, jobs <-chan downloadQuery, results chan<- downloadQuery) {
+func (m *MapDownloader) worker(c cache.Cache, vendor string, jobs <-chan downloadQuery, results chan<- downloadQuery) {
 	for j := range jobs {
 		if c != nil {
-			cacheImg, err := c.LoadFile(vendor, &j.Tile)
+			cacheImg, err := c.LoadTile(vendor, &j.Tile)
 			if err == nil {
 				j.Tile.Image = cacheImg
 				results <- j
@@ -58,7 +76,13 @@ func worker(c *cache.Cache, vendor string, jobs <-chan downloadQuery, results ch
 			}
 		}
 
-		resp, err := http.DefaultClient.Do(j.Request)
+		if j.Request == nil {
+			j.Error = fmt.Errorf("request is empty")
+			results <- j
+			continue
+		}
+
+		resp, err := m.client.Do(j.Request)
 		if err != nil {
 			j.Error = fmt.Errorf("error occurred when sending request to the server: err=%w", err)
 			results <- j

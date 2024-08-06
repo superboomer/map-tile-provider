@@ -7,8 +7,8 @@ import (
 	"go.uber.org/zap"
 )
 
-// ProviderModel contains data about provider
-type ProviderModel struct {
+// providerModel contains data about provider
+type providerModel struct {
 	Name    string `json:"name"`
 	Key     string `json:"key"`
 	MaxZoom int    `json:"max_zoom"`
@@ -19,20 +19,20 @@ type ProviderModel struct {
 // @Description reutrn JSON array with avalible provders
 // @Accept  text/plain
 // @Produce  application/json
-// @Success		200	{array}	ProviderModel
+// @Success		200	{array}	providerModel
 // @Header 200 {string} X-Request-Id "request_id"
 // @Router /provider [get]
 func (a *API) Provider(w http.ResponseWriter, req *http.Request) {
 
-	var allProviders = make([]ProviderModel, 0)
+	var allProviders = make([]providerModel, 0)
 
-	for _, key := range a.Providers.GetAllKey() {
+	for _, key := range a.Providers.GetAllID() {
 		p, err := a.Providers.Get(key)
 		if err != nil {
 			continue
 		}
 
-		allProviders = append(allProviders, ProviderModel{Name: p.Name(), Key: p.Key(), MaxZoom: p.MaxZoom()})
+		allProviders = append(allProviders, providerModel{Name: p.Name(), Key: p.ID(), MaxZoom: p.MaxZoom()})
 	}
 
 	results, err := json.Marshal(allProviders)
