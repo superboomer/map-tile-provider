@@ -5,7 +5,7 @@
         "max_jobs": 5,
         "max_zoom": 21,
         "proj": "spherical",
-        "url": {
+        "request": {
             "url": "https://mts1.google.com/vt/lyrs=s?x={x}&y={y}&z={z}"
         }
     },
