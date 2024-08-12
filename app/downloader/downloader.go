@@ -98,7 +98,7 @@ func (m *MapDownloader) worker(c cache.Cache, vendor string, jobs <-chan downloa
 		}
 
 		if resp.StatusCode != 200 {
-			j.Error = fmt.Errorf("server returned invalid status code: code=%d, body=%s", resp.StatusCode, string(img))
+			j.Error = fmt.Errorf("server returned invalid status code: code=%d", resp.StatusCode)
 			results <- j
 			_ = resp.Body.Close()
 			continue
