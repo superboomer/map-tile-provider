@@ -51,7 +51,7 @@ paths:
       - text/plain
       description: return merged satellite tiles in one image
       parameters:
-      - description: Map provider
+      - description: tile provider
         in: query
         name: provider
         required: true

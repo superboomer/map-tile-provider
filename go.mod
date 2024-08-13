@@ -1,4 +1,4 @@
-module github.com/superboomer/map-tile-provider
+module github.com/superboomer/maptile
 
 go 1.22
 

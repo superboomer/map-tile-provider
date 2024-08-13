@@ -8,7 +8,7 @@ import (
 	"image/jpeg"
 	"sort"
 
-	"github.com/superboomer/map-tile-provider/app/tile"
+	"github.com/superboomer/maptile/app/tile"
 )
 
 type imageTileSlice []tile.Tile

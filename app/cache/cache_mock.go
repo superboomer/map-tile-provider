@@ -4,7 +4,7 @@
 package cache
 
 import (
-	"github.com/superboomer/map-tile-provider/app/tile"
+	"github.com/superboomer/maptile/app/tile"
 	"sync"
 )
 

@@ -6,7 +6,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/superboomer/map-tile-provider/app/options"
+	"github.com/superboomer/maptile/app/options"
 )
 
 func TestCreateLogger(t *testing.T) {

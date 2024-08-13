@@ -3,19 +3,23 @@
 Make sure that you agree and stick to the policies
 of the tile-providers before downloading!
 
-[Tile usage policy](https://wiki.openstreetmap.org/index.php/Tile_usage_policy)
-of OpenStreetMap if you use OSP tiles!
+[Tile usage policy](https://wiki.openstreetmap.org/index.php/Tile_usage_policy) if you use ***OpenStreetMap*** tiles!
+
+[Tile usage policy](https://developers.google.com/maps/documentation/tile) if you use ***Google*** tiles!
+
+[Tile usage policy](https://doc.arcgis.com/en/arcgis-online/reference/faq.htm) if you use ***ArcGIS*** tiles!
+
 
 ---
 <div align="center">
   <img class="logo" src="https://raw.githubusercontent.com/superboomer/map-tile-provider/master/assets/logo.png" width="128px" height="128px" alt="logo"/>
   <br>
   <br>
-  <b>Map Tile Provider</b>
+  <b>MapTile</b>
   <br>
   <br>
 
-  [![build](https://github.com/superboomer/map-tile-provider/actions/workflows/build.yml/badge.svg)](https://github.com/superboomer/map-tile-provider/actions/workflows/build.yml)&nbsp;[![Go Report Card](https://goreportcard.com/badge/github.com/superboomer/map-tile-provider)](https://goreportcard.com/report/github.com/superboomer/map-tile-provider)&nbsp;[![Coverage Status](https://coveralls.io/repos/github/superboomer/map-tile-provider/badge.svg?branch=master)](https://coveralls.io/github/superboomer/map-tile-provider?branch=master)
+  [![build](https://github.com/superboomer/maptile/actions/workflows/build.yml/badge.svg)](https://github.com/superboomer/maptile/actions/workflows/build.yml)&nbsp;[![Go Report Card](https://goreportcard.com/badge/github.com/superboomer/maptile)](https://goreportcard.com/report/github.com/superboomer/maptile)&nbsp;[![Coverage Status](https://coveralls.io/repos/github/superboomer/map-tile-provider/badge.svg?branch=master)](https://coveralls.io/github/superboomer/map-tile-provider?branch=master)
 </div>
 
 
@@ -39,13 +43,13 @@ of OpenStreetMap if you use OSP tiles!
 | API_PORT | api port    |  ***Optional***  | 8080
 | SWAGGER | swagger docs    |  ***Optional***  | false
 | MAX_SIDE | max square side    |  ***Optional***  | 10
-> All environment variables are available in [source code](https://github.com/superboomer/map-tile-provider/blob/master/app/options/opt.go)
+> All environment variables are available in [source code](https://github.com/superboomer/maptile/blob/master/app/options/opt.go)
 ***
 
 
 # **Providers**
 
-Example [providers.json](https://github.com/superboomer/map-tile-provider/blob/master/example/providers.json) contains 3 providers. *(but you can set up any providers as you wish. also service support loading .json from local FS)*
+Example [providers.json](https://github.com/superboomer/maptile/blob/master/example/providers.json) contains 3 providers. *(but you can set up any providers as you wish. also service support loading .json from local FS)*
 
 - OpenStreetMap
 - Google Maps (Satellite)
@@ -70,7 +74,10 @@ services:
     ports:
       - "8080:8080"
 ```
-> Full example [here](https://github.com/superboomer/map-tile-provider/blob/master/example)
+> Full example [here](https://github.com/superboomer/maptile/blob/master/example)
 
 ***
 
+# Use
+
+ If you need to download a big amount of tiles, you can use [maptiled](https://github.com/superboomer/maptiled)

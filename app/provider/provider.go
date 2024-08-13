@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/superboomer/map-tile-provider/app/tile"
+	"github.com/superboomer/maptile/app/tile"
 )
 
 //go:generate moq -out provider_mock.go -fmt goimports . Provider

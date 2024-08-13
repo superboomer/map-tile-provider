@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/superboomer/map-tile-provider/app/options"
-	"github.com/superboomer/map-tile-provider/app/server/api"
+	"github.com/superboomer/maptile/app/options"
+	"github.com/superboomer/maptile/app/server/api"
 	"go.uber.org/zap"
 )
 

@@ -5,9 +5,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/superboomer/map-tile-provider/app/cache"
-	"github.com/superboomer/map-tile-provider/app/provider"
-	"github.com/superboomer/map-tile-provider/app/tile"
+	"github.com/superboomer/maptile/app/cache"
+	"github.com/superboomer/maptile/app/provider"
+	"github.com/superboomer/maptile/app/tile"
 )
 
 //go:generate moq -out downloader_mock.go  -fmt goimports . Downloader

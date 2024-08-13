@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/superboomer/map-tile-provider/app/options"
-	"github.com/superboomer/map-tile-provider/app/server"
+	"github.com/superboomer/maptile/app/options"
+	"github.com/superboomer/maptile/app/server"
 	"github.com/umputun/go-flags"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

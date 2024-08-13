@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/superboomer/map-tile-provider/app/options"
-	"github.com/superboomer/map-tile-provider/app/server/api"
-	"github.com/superboomer/map-tile-provider/app/server/middleware"
+	"github.com/superboomer/maptile/app/options"
+	"github.com/superboomer/maptile/app/server/api"
+	"github.com/superboomer/maptile/app/server/middleware"
 	"go.uber.org/zap"
 )
 

@@ -10,7 +10,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/superboomer/map-tile-provider/app/provider"
+	"github.com/superboomer/maptile/app/provider"
 )
 
 // mapErrorModel contains data about error query

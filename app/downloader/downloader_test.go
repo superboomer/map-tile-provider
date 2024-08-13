@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/superboomer/map-tile-provider/app/cache"
-	"github.com/superboomer/map-tile-provider/app/provider"
-	"github.com/superboomer/map-tile-provider/app/tile"
+	"github.com/superboomer/maptile/app/cache"
+	"github.com/superboomer/maptile/app/provider"
+	"github.com/superboomer/maptile/app/tile"
 )
 
 func TestDownload_SuccessfulWithoutCacheHit(t *testing.T) {

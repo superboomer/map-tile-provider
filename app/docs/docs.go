@@ -54,7 +54,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Map provider",
+                        "description": "tile provider",
                         "name": "provider",
                         "in": "query",
                         "required": true

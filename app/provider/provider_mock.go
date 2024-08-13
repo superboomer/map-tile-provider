@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/superboomer/map-tile-provider/app/tile"
+	"github.com/superboomer/maptile/app/tile"
 )
 
 // Ensure, that ProviderMock does implement Provider.

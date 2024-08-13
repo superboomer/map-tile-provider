@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/superboomer/map-tile-provider/app/tile"
+	"github.com/superboomer/maptile/app/tile"
 	"go.etcd.io/bbolt"
 )
 
@@ -27,14 +27,14 @@ func TestNewCache_FailedDir(t *testing.T) {
 }
 
 func TestNewCache_FailedIndex(t *testing.T) {
-	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test")
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-failed")
 	defer os.RemoveAll(tmpDir)
 
 	cache, err := NewCache(tmpDir, time.Hour, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, cache)
 
-	cache2, err := NewCache(tmpDir, time.Hour, &bbolt.Options{Timeout: time.Second})
+	cache2, err := NewCache(tmpDir, time.Hour, &bbolt.Options{Timeout: time.Microsecond})
 	assert.Error(t, err)
 	assert.Nil(t, cache2)
 }
@@ -52,7 +52,7 @@ func TestSaveTile_Success(t *testing.T) {
 }
 
 func TestSaveTile_FailedReadOnly(t *testing.T) {
-	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save")
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-save-failed")
 	defer os.RemoveAll(tmpDir)
 
 	createCacheFile, err := NewCache(tmpDir, time.Hour, nil)
@@ -86,7 +86,7 @@ func TestLoadTile_Success(t *testing.T) {
 }
 
 func TestLoadTile_FailedBucketError(t *testing.T) {
-	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load-failed")
 	defer os.RemoveAll(tmpDir)
 
 	cache, err := NewCache(tmpDir, time.Hour, nil)
@@ -98,7 +98,7 @@ func TestLoadTile_FailedBucketError(t *testing.T) {
 }
 
 func TestLoadTile_FailedTileError(t *testing.T) {
-	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load")
+	tmpDir := filepath.Join(os.TempDir(), "map-tile-provider-test-load-failed-tile")
 	defer os.RemoveAll(tmpDir)
 
 	cache, err := NewCache(tmpDir, time.Hour, nil)

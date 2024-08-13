@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/superboomer/map-tile-provider/app/cache"
-	"github.com/superboomer/map-tile-provider/app/downloader"
-	"github.com/superboomer/map-tile-provider/app/options"
-	"github.com/superboomer/map-tile-provider/app/provider"
+	"github.com/superboomer/maptile/app/cache"
+	"github.com/superboomer/maptile/app/downloader"
+	"github.com/superboomer/maptile/app/options"
+	"github.com/superboomer/maptile/app/provider"
 	"go.uber.org/zap"
 )
 

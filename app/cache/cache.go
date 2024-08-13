@@ -10,7 +10,7 @@ import (
 
 	"go.etcd.io/bbolt"
 
-	"github.com/superboomer/map-tile-provider/app/tile"
+	"github.com/superboomer/maptile/app/tile"
 )
 
 //go:generate moq -out cache_mock.go . Cache

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/superboomer/map-tile-provider/app/options"
+	"github.com/superboomer/maptile/app/options"
 	"go.uber.org/zap"
 )
 
