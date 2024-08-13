@@ -12,14 +12,14 @@ of the tile-providers before downloading!
 
 ---
 <div align="center">
-  <img class="logo" src="https://raw.githubusercontent.com/superboomer/map-tile-provider/master/assets/logo.png" width="128px" height="128px" alt="logo"/>
+  <img class="logo" src="https://raw.githubusercontent.com/superboomer/maptile/master/assets/logo.png" width="128px" height="128px" alt="logo"/>
   <br>
   <br>
-  <b>MapTile</b>
+  <b>maptile</b>
   <br>
   <br>
 
-  [![build](https://github.com/superboomer/maptile/actions/workflows/build.yml/badge.svg)](https://github.com/superboomer/maptile/actions/workflows/build.yml)&nbsp;[![Go Report Card](https://goreportcard.com/badge/github.com/superboomer/maptile)](https://goreportcard.com/report/github.com/superboomer/maptile)&nbsp;[![Coverage Status](https://coveralls.io/repos/github/superboomer/map-tile-provider/badge.svg?branch=master)](https://coveralls.io/github/superboomer/map-tile-provider?branch=master)
+  [![build](https://github.com/superboomer/maptile/actions/workflows/build.yml/badge.svg)](https://github.com/superboomer/maptile/actions/workflows/build.yml)&nbsp;[![Go Report Card](https://goreportcard.com/badge/github.com/superboomer/maptile)](https://goreportcard.com/report/github.com/superboomer/maptile)&nbsp;[![Coverage Status](https://coveralls.io/repos/github/superboomer/maptile/badge.svg?branch=master)](https://coveralls.io/github/superboomer/maptile?branch=master)
 </div>
 
 
@@ -65,12 +65,12 @@ version: '3.7'
 
 services:
 
-  map-tile-provider:
-    image: ghcr.io/superboomer/map-tile-provider:latest
-    container_name: map-tile-provider
+  maptile:
+    image: ghcr.io/superboomer/maptile:latest
+    container_name: maptile
     restart: unless-stopped
     environment:
-      - SCHEMA=https://raw.githubusercontent.com/superboomer/map-tile-provider/master/example/providers.json
+      - SCHEMA=https://raw.githubusercontent.com/superboomer/maptile/master/example/providers.json
     ports:
       - "8080:8080"
 ```
